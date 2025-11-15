@@ -121,5 +121,17 @@ export const useUserStore = defineStore(
       logout,
       resetStore
     }
+  },
+  {
+    persist: {
+      enabled: true,
+      strategies: [
+        {
+          key: 'user_store',
+          storage: localStorage,
+          paths: ['token', 'userInfo']
+        }
+      ]
+    }
   }
 )

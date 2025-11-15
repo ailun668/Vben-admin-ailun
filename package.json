@@ -14,13 +14,18 @@
     "axios": "^1.13.2",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.19",
+    "exceljs": "^4.4.0",
     "lodash-es": "^4.17.21",
     "nprogress": "^0.2.0",
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
     "qs": "^6.14.0",
     "vue": "^3.5.24",
-    "vue-router": "^4.6.3"
+    "vue-router": "^4.6.3",
+    "vxe-table": "4.4.5",
+    "vxe-table-plugin-export-xlsx": "3.0.4",
+    "xe-utils": "3.5.11",
+    "xlsx": "0.18.5"
   },
   "devDependencies": {
     "@types/node": "^24.10.0",

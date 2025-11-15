@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PaySecure - 企业级支付平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .glass {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .card-shimmer {
+      background: linear-gradient(90deg, #4F46E5 0%, #7C3AED 50%, #4F46E5 100%);
+      background-size: 200% 100%;
+      animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    .transaction-item {
+      transition: all 0.3s ease;
+    }
+    
+    .transaction-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .security-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 8px 16px;
+      background: rgba(16, 185, 129, 0.9);
+      color: white;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .feature-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+  </style>
+</head>
+<body class="min-h-screen p-4">
+  <div id="app"></div>
+
+  <!-- 首先加载 Vue 库 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  
+  <!-- 然后使用 Vue -->
+  <script>
+    const { createApp, ref, computed, onMounted, watch } = Vue;
+
+    createApp({
+      setup() {
+        // ===== 状态管理 =====
+        const currentView = ref('dashboard'); // dashboard, wallet, transfer, kyc, history
+        const user = ref({
+          name: 'Rahul Kumar',
+          phone: '+91 98765 43210',
+          kycStatus: 'verified', // pending, verified, rejected
+          kycTier: 'tier2',
+          balance: 125430.50,
+          upiId: 'rahul.kumar@paytm'
+        });
+
+        const transactions = ref([
+          {
+            id: 'TXN001928374',
+            type: 'transfer',
+            amount: -2500,
+            recipient: 'Priya Sharma',
+            recipientUPI: 'priya@phonepe',
+            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+            status: 'success',
+            method: 'UPI'
+          },
+          {
+            id: 'TXN001928373',
+            type: 'receive',
+            amount: 5000,
+            sender: 'Amit Patel',
+            senderUPI: 'amit@paytm',
+            timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
+            status: 'success',
+            method: 'UPI'
+          },
+          {
+            id: 'TXN001928372',
+            type: 'recharge',
+            amount: 500,
+            service: 'Mobile Recharge',
+            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
+            status: 'success',
+            method: 'Wallet'
+          },
+          {
+            id: 'TXN001928371',
+            type: 'transfer',
+            amount: -15000,
+            recipient: 'Ananya Gupta',
+            recipientUPI: 'ananya@gpay',
+            timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+            status: 'pending',
+            method: 'UPI'
+          }
+        ]);
+
+        // 转账表单
+        const transferForm = ref({
+          recipientUPI: '',
+          amount: '',
+          note: '',
+          currentStep: 1, // 1: 输入, 2: OTP, 3: 确认, 4: 结果
+          otp: '',
+          generatedOTP: '',
+          transactionId: '',
+          status: null,
+          error: null
+        });
+
+        // KYC 表单
+        const kycForm = ref({
+          fullName: '',
+          aadhaarNumber: '',
+          panNumber: '',
+          address: '',
+          documentType: 'aadhaar',
+          uploading: false,
+          uploadProgress: 0
+        });
+
+        // 网络状态
+        const isOnline = ref(navigator.onLine);
+        const isSecure = computed(() => location.protocol === 'https:' || location.hostname === 'localhost');
+
+        // ===== 计算属性 =====
+        const formattedBalance = computed(() => {
+          return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR'
+          }).format(user.value.balance);
+        });
+
+        const kycLimits = computed(() => {
+          const limits = {
+            tier1: { daily: 20000, monthly: 100000 },
+            tier2: { daily: 100000, monthly: 1000000 },
+            tier3: { daily: 1000000, monthly: 10000000 }
+          };
+          return limits[user.value.kycTier] || limits.tier1;
+        });
+
+        const recentTransactions = computed(() => {
+          return transactions.value.slice(0, 5);
+        });
+
+        // ===== 支付功能 =====
+        const initiateTransfer = () => {
+          transferForm.value.error = null;
+          
+          // 验证UPI ID格式
+          const upiRegex = /^[\w.-]+@[\w.-]+$/;
+          if (!upiRegex.test(transferForm.value.recipientUPI)) {
+            transferForm.value.error = '请输入有效的UPI ID (例如: user@paytm)';
+            return;
+          }
+
+          // 验证金额
+          const amount = parseFloat(transferForm.value.amount);
+          if (isNaN(amount) || amount <= 0) {
+            transferForm.value.error = '请输入有效的金额';
+            return;
+          }
+
+          if (amount > user.value.balance) {
+            transferForm.value.error = '余额不足';
+            return;
+          }
+
+          if (amount > kycLimits.value.daily) {
+            transferForm.value.error = `单笔限额 ₹${kycLimits.value.daily.toLocaleString('en-IN')} (${user.value.kycTier.toUpperCase()})`;
+            return;
+          }
+
+          // 生成OTP
+          transferForm.value.generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+          console.log('模拟OTP:', transferForm.value.generatedOTP); // 生产环境中通过短信发送
+          transferForm.value.currentStep = 2;
+        };
+
+        const verifyOTP = () => {
+          if (transferForm.value.otp === transferForm.value.generatedOTP) {
+            transferForm.value.currentStep = 3;
+            transferForm.value.error = null;
+          } else {
+            transferForm.value.error = 'OTP验证失败,请重试';
+          }
+        };
+
+        const confirmTransfer = async () => {
+          transferForm.value.currentStep = 4;
+          transferForm.value.status = 'processing';
+
+          // 模拟网络请求
+          await new Promise(resolve => setTimeout(resolve, 2000));
+
+          // 90% 成功率模拟
+          const success = Math.random() > 0.1;
+
+          if (success) {
+            const transactionId = 'TXN' + Math.floor(Math.random() * 10000000);
+            const amount = parseFloat(transferForm.value.amount);
+
+            // 更新余额
+            user.value.balance -= amount;
+
+            // 添加交易记录
+            transactions.value.unshift({
+              id: transactionId,
+              type: 'transfer',
+              amount: -amount,
+              recipient: transferForm.value.recipientUPI.split('@')[0],
+              recipientUPI: transferForm.value.recipientUPI,
+              timestamp: new Date(),
+              status: 'success',
+              method: 'UPI',
+              note: transferForm.value.note
+            });
+
+            transferForm.value.status = 'success';
+            transferForm.value.transactionId = transactionId;
+          } else {
+            transferForm.value.status = 'failed';
+            transferForm.value.error = '转账失败,请稍后重试';
+          }
+        };
+
+        const resetTransfer = () => {
+          transferForm.value = {
+            recipientUPI: '',
+            amount: '',
+            note: '',
+            currentStep: 1,
+            otp: '',
+            generatedOTP: '',
+            transactionId: '',
+            status: null,
+            error: null
+          };
+        };
+
+        // ===== KYC功能 =====
+        const submitKYC = async () => {
+          kycForm.value.uploading = true;
+          kycForm.value.uploadProgress = 0;
+
+          // 模拟文件上传
+          const uploadInterval = setInterval(() => {
+            kycForm.value.uploadProgress += 10;
+            if (kycForm.value.uploadProgress >= 100) {
+              clearInterval(uploadInterval);
+              setTimeout(() => {
+                user.value.kycStatus = 'verified';
+                user.value.kycTier = 'tier2';
+                kycForm.value.uploading = false;
+                alert('KYC验证已提交,通常在24小时内完成审核');
+                currentView.value = 'dashboard';
+              }, 500);
+            }
+          }, 200);
+        };
+
+        // ===== 格式化函数 =====
+        const formatAmount = (amount) => {
+          return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR'
+          }).format(Math.abs(amount));
+        };
+
+        const formatDate = (date) => {
+          const now = new Date();
+          const diff = now - date;
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          
+          if (hours < 1) {
+            const minutes = Math.floor(diff / (1000 * 60));
+            return `${minutes}分钟前`;
+          } else if (hours < 24) {
+            return `${hours}小时前`;
+          } else {
+            return date.toLocaleDateString('zh-CN', {
+              month: 'short',
+              day: 'numeric'
+            });
+          }
+        };
+
+        // ===== 生命周期 =====
+        onMounted(() => {
+          // 监听网络状态
+          window.addEventListener('online', () => isOnline.value = true);
+          window.addEventListener('offline', () => isOnline.value = false);
+
+          // 模拟实时余额更新 (WebSocket)
+          setInterval(() => {
+            if (Math.random() > 0.95) {
+              const amount = Math.floor(Math.random() * 1000) + 100;
+              user.value.balance += amount;
+              
+              transactions.value.unshift({
+                id: 'TXN' + Math.floor(Math.random() * 10000000),
+                type: 'receive',
+                amount: amount,
+                sender: 'Customer',
+                timestamp: new Date(),
+                status: 'success',
+                method: 'UPI'
+              });
+            }
+          }, 10000);
+        });
+
+        return {
+          currentView,
+          user,
+          transactions,
+          transferForm,
+          kycForm,
+          isOnline,
+          isSecure,
+          formattedBalance,
+          kycLimits,
+          recentTransactions,
+          initiateTransfer,
+          verifyOTP,
+          confirmTransfer,
+          resetTransfer,
+          submitKYC,
+          formatAmount,
+          formatDate
+        };
+      },
+      
+      template: `
+        <div class="max-w-6xl mx-auto">
+          <!-- 安全指示器 -->
+          <div class="security-indicator" v-if="isSecure">
+            <div class="pulse-dot bg-white"></div>
+            <span>🔒 安全加密连接 (TLS 1.3)</span>
+          </div>
+
+          <!-- 离线提示 -->
+          <div v-if="!isOnline" class="fixed top-20 right-20 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+            ⚠️ 离线模式 - 数据将在联网后同步
+          </div>
+
+          <!-- 头部 -->
+          <div class="glass rounded-2xl p-6 mb-6 shadow-xl">
+            <div class="flex justify-between items-center">
+              <div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-1">PaySecure</h1>
+                <p class="text-gray-500 text-sm">企业级支付平台 | RBI & PCI-DSS 合规</p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-gray-500">欢迎回来,</p>
+                <p class="text-xl font-semibold text-gray-800">{{ user.name }}</p>
+                <div class="mt-2">
+                  <span class="status-badge" :class="user.kycStatus === 'verified' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
+                    <span v-if="user.kycStatus === 'verified'">✓</span>
+                    {{ user.kycStatus === 'verified' ? 'KYC已认证' : 'KYC待认证' }}
+                  </span>
+                  <span class="status-badge bg-blue-100 text-blue-800 ml-2">
+                    {{ user.kycTier.toUpperCase() }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 导航栏 -->
+          <div class="glass rounded-2xl p-4 mb-6 shadow-xl">
+            <div class="flex gap-2">
+              <button 
+                @click="currentView = 'dashboard'"
+                :class="currentView === 'dashboard' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                class="flex-1 py-3 px-4 rounded-xl font-semibold transition-all">
+                🏠 仪表板
+              </button>
+              <button 
+                @click="currentView = 'wallet'"
+                :class="currentView === 'wallet' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                class="flex-1 py-3 px-4 rounded-xl font-semibold transition-all">
+                💰 钱包
+              </button>
+              <button 
+                @click="currentView = 'transfer'"
+                :class="currentView === 'transfer' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                class="flex-1 py-3 px-4 rounded-xl font-semibold transition-all">
+                💸 转账
+              </button>
+              <button 
+                @click="currentView = 'kyc'"
+                :class="currentView === 'kyc' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                class="flex-1 py-3 px-4 rounded-xl font-semibold transition-all">
+                🆔 KYC
+              </button>
+              <button 
+                @click="currentView = 'history'"
+                :class="currentView === 'history' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                class="flex-1 py-3 px-4 rounded-xl font-semibold transition-all">
+                📊 历史
+              </button>
+            </div>
+          </div>
+
+          <!-- 仪表板视图 -->
+          <div v-if="currentView === 'dashboard'" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 余额卡片 -->
+            <div class="lg:col-span-2 glass rounded-2xl p-8 shadow-xl card-shimmer text-white">
+              <div class="flex justify-between items-start mb-6">
+                <div>
+                  <p class="text-white/80 text-sm mb-2">总余额</p>
+                  <h2 class="text-5xl font-bold">{{ formattedBalance }}</h2>
+                </div>
+                <div class="bg-white/20 p-3 rounded-xl">
+                  <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                    <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+                  <p class="text-white/70 text-sm">日限额剩余</p>
+                  <p class="text-2xl font-bold mt-1">₹{{ kycLimits.daily.toLocaleString('en-IN') }}</p>
+                </div>
+                <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+                  <p class="text-white/70 text-sm">月限额剩余</p>
+                  <p class="text-2xl font-bold mt-1">₹{{ kycLimits.monthly.toLocaleString('en-IN') }}</p>
+                </div>
+              </div>
+              <div class="mt-6 pt-6 border-t border-white/20">
+                <p class="text-white/80 text-sm">UPI ID</p>
+                <p class="text-xl font-mono font-semibold mt-1">{{ user.upiId }}</p>
+              </div>
+            </div>
+
+            <!-- 快捷操作 -->
+            <div class="glass rounded-2xl p-6 shadow-xl">
+              <h3 class="text-lg font-bold text-gray-800 mb-4">快捷操作</h3>
+              <div class="space-y-3">
+                <button @click="currentView = 'transfer'" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
+                  <span>💸</span> 发起转账
+                </button>
+                <button class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 px-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
+                  <span>➕</span> 充值
+                </button>
+                <button @click="currentView = 'kyc'" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 px-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
+                  <span>🆔</span> KYC升级
+                </button>
+              </div>
+            </div>
+
+            <!-- 最近交易 -->
+            <div class="lg:col-span-3 glass rounded-2xl p-6 shadow-xl">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">最近交易</h3>
+                <button @click="currentView = 'history'" class="text-indigo-600 hover:text-indigo-700 font-semibold text-sm">
+                  查看全部 →
+                </button>
+              </div>
+              <div class="space-y-3">
+                <div v-for="tx in recentTransactions" :key="tx.id" class="transaction-item bg-white rounded-xl p-4 border border-gray-100">
+                  <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                      <div :class="tx.type === 'transfer' ? 'bg-red-100' : 'bg-green-100'" class="w-12 h-12 rounded-full flex items-center justify-center">
+                        <span class="text-2xl">{{ tx.type === 'transfer' ? '↑' : '↓' }}</span>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-gray-800">
+                          {{ tx.type === 'transfer' ? tx.recipient : tx.sender || tx.service }}
+                        </p>
+                        <p class="text-sm text-gray-500">{{ tx.recipientUPI || tx.senderUPI || tx.method }}</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ formatDate(tx.timestamp) }}</p>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <p :class="tx.amount > 0 ? 'text-green-600' : 'text-red-600'" class="text-xl font-bold">
+                        {{ tx.amount > 0 ? '+' : '' }}{{ formatAmount(tx.amount) }}
+                      </p>
+                      <span class="status-badge mt-2" :class="tx.status === 'success' ? 'bg-green-100 text-green-800' : tx.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'">
+                        {{ tx.status === 'success' ? '成功' : tx.status === 'pending' ? '处理中' : '失败' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 转账视图 -->
+          <div v-if="currentView === 'transfer'" class="max-w-2xl mx-auto">
+            <div class="glass rounded-2xl p-8 shadow-xl">
+              <!-- 步骤1: 输入信息 -->
+              <div v-if="transferForm.currentStep === 1">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">UPI转账</h2>
+                
+                <div v-if="transferForm.error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4">
+                  {{ transferForm.error }}
+                </div>
+
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">收款人 UPI ID</label>
+                    <input 
+                      v-model="transferForm.recipientUPI"
+                      type="text" 
+                      placeholder="user@paytm" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">金额 (₹)</label>
+                    <input 
+                      v-model="transferForm.amount"
+                      type="number" 
+                      placeholder="0.00" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <p class="text-sm text-gray-500 mt-2">
+                      可用余额: {{ formattedBalance }} | 日限额: ₹{{ kycLimits.daily.toLocaleString('en-IN') }}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">备注 (可选)</label>
+                    <textarea 
+                      v-model="transferForm.note"
+                      rows="3" 
+                      placeholder="添加备注..." 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"></textarea>
+                  </div>
+
+                  <button 
+                    @click="initiateTransfer"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold text-lg transition-all">
+                    继续 →
+                  </button>
+                </div>
+              </div>
+
+              <!-- 步骤2: OTP验证 -->
+              <div v-if="transferForm.currentStep === 2">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">验证OTP</h2>
+                <p class="text-gray-600 mb-6">我们已向 {{ user.phone }} 发送验证码</p>
+                
+                <div v-if="transferForm.error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4">
+                  {{ transferForm.error }}
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl mb-6">
+                  <p class="font-semibold">模拟OTP: {{ transferForm.generatedOTP }}</p>
+                  <p class="text-sm mt-1">生产环境中将通过短信发送</p>
+                </div>
+
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">输入6位验证码</label>
+                    <input 
+                      v-model="transferForm.otp"
+                      type="text" 
+                      maxlength="6"
+                      placeholder="000000" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-xl text-center text-2xl font-mono tracking-widest focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                  </div>
+
+                  <div class="flex gap-3">
+                    <button 
+                      @click="transferForm.currentStep = 1"
+                      class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-4 rounded-xl font-bold transition-all">
+                      ← 返回
+                    </button>
+                    <button 
+                      @click="verifyOTP"
+                      class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold transition-all">
+                      验证
+                    </button>
+                  </div>
+
+                  <button class="w-full text-indigo-600 hover:text-indigo-700 font-semibold text-sm">
+                    重新发送验证码
+                  </button>
+                </div>
+              </div>
+
+              <!-- 步骤3: 确认转账 -->
+              <div v-if="transferForm.currentStep === 3">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">确认转账</h2>
+                
+                <div class="bg-gray-50 rounded-xl p-6 mb-6 space-y-4">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">收款人</span>
+                    <span class="font-semibold">{{ transferForm.recipientUPI }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">金额</span>
+                    <span class="font-bold text-2xl text-indigo-600">₹{{ parseFloat(transferForm.amount).toLocaleString('en-IN') }}</span>
+                  </div>
+                  <div class="flex justify-between" v-if="transferForm.note">
+                    <span class="text-gray-600">备注</span>
+                    <span class="font-semibold">{{ transferForm.note }}</span>
+                  </div>
+                  <div class="flex justify-between pt-4 border-t border-gray-200">
+                    <span class="text-gray-600">转账后余额</span>
+                    <span class="font-semibold">₹{{ (user.balance - parseFloat(transferForm.amount)).toLocaleString('en-IN') }}</span>
+                  </div>
+                </div>
+
+                <div class="flex gap-3">
+                  <button 
+                    @click="transferForm.currentStep = 1"
+                    class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-4 rounded-xl font-bold transition-all">
+                    取消
+                  </button>
+                  <button 
+                    @click="confirmTransfer"
+                    class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold transition-all">
+                    确认转账
+                  </button>
+                </div>
+              </div>
+
+              <!-- 步骤4: 结果 -->
+              <div v-if="transferForm.currentStep === 4">
+                <div v-if="transferForm.status === 'processing'" class="text-center py-12">
+                  <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mb-4"></div>
+                  <p class="text-xl font-semibold text-gray-800">处理中...</p>
+                  <p class="text-gray-600 mt-2">请稍候,正在处理您的转账</p>
+                </div>
+
+                <div v-if="transferForm.status === 'success'" class="text-center py-12">
+                  <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-5xl">✓</span>
+                  </div>
+                  <h2 class="text-3xl font-bold text-green-600 mb-2">转账成功!</h2>
+                  <p class="text-gray-600 mb-6">交易ID: {{ transferForm.transactionId }}</p>
+                  
+                  <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                    <div class="flex justify-between mb-2">
+                      <span class="text-gray-600">金额</span>
+                      <span class="font-bold text-2xl">₹{{ parseFloat(transferForm.amount).toLocaleString('en-IN') }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-600">收款人</span>
+                      <span class="font-semibold">{{ transferForm.recipientUPI }}</span>
+                    </div>
+                  </div>
+
+                  <button 
+                    @click="resetTransfer(); currentView = 'dashboard'"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold transition-all">
+                    完成
+                  </button>
+                </div>
+
+                <div v-if="transferForm.status === 'failed'" class="text-center py-12">
+                  <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-5xl">✗</span>
+                  </div>
+                  <h2 class="text-3xl font-bold text-red-600 mb-2">转账失败</h2>
+                  <p class="text-gray-600 mb-6">{{ transferForm.error }}</p>
+                  
+                  <div class="flex gap-3">
+                    <button 
+                      @click="resetTransfer()"
+                      class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-4 rounded-xl font-bold transition-all">
+                      重新开始
+                    </button>
+                    <button 
+                      @click="confirmTransfer"
+                      class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold transition-all">
+                      重试
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KYC视图 -->
+          <div v-if="currentView === 'kyc'" class="max-w-2xl mx-auto">
+            <div class="glass rounded-2xl p-8 shadow-xl">
+              <h2 class="text-2xl font-bold text-gray-800 mb-6">KYC验证</h2>
+              
+              <div v-if="user.kycStatus === 'verified'" class="text-center py-12">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span class="text-5xl">✓</span>
+                </div>
+                <h3 class="text-2xl font-bold text-green-600 mb-2">KYC已认证</h3>
+                <p class="text-gray-600 mb-4">您的KYC等级: {{ user.kycTier.toUpperCase() }}</p>
+                
+                <div class="bg-gray-50 rounded-xl p-6 text-left">
+                  <h4 class="font-bold mb-3">当前限额</h4>
+                  <div class="space-y-2">
+                    <div class="flex justify-between">
+                      <span class="text-gray-600">单笔限额</span>
+                      <span class="font-semibold">₹{{ kycLimits.daily.toLocaleString('en-IN') }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-600">月限额</span>
+                      <span class="font-semibold">₹{{ kycLimits.monthly.toLocaleString('en-IN') }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div v-else>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">完整姓名</label>
+                    <input 
+                      v-model="kycForm.fullName"
+                      type="text" 
+                      placeholder="如身份证上所示" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Aadhaar号码</label>
+                    <input 
+                      v-model="kycForm.aadhaarNumber"
+                      type="text" 
+                      placeholder="XXXX XXXX XXXX" 
+                      maxlength="12"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">PAN号码</label>
+                    <input 
+                      v-model="kycForm.panNumber"
+                      type="text" 
+                      placeholder="XXXXX0000X" 
+                      maxlength="10"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">地址</label>
+                    <textarea 
+                      v-model="kycForm.address"
+                      rows="3" 
+                      placeholder="完整地址" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">文档类型</label>
+                    <select 
+                      v-model="kycForm.documentType"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                      <option value="aadhaar">Aadhaar卡</option>
+                      <option value="pan">PAN卡</option>
+                      <option value="passport">护照</option>
+                    </select>
+                  </div>
+
+                  <div v-if="kycForm.uploading" class="bg-blue-50 rounded-xl p-4">
+                    <div class="flex justify-between mb-2">
+                      <span class="text-sm font-semibold">上传中...</span>
+                      <span class="text-sm font-semibold">{{ kycForm.uploadProgress }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                      <div class="bg-indigo-600 h-2 rounded-full transition-all" :style="{ width: kycForm.uploadProgress + '%' }"></div>
+                    </div>
+                  </div>
+
+                  <button 
+                    @click="submitKYC"
+                    :disabled="kycForm.uploading"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white py-4 rounded-xl font-bold transition-all">
+                    {{ kycForm.uploading ? '上传中...' : '提交验证' }}
+                  </button>
+
+                  <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                    <p class="text-sm text-yellow-800">
+                      🔒 <strong>数据安全</strong>: 所有敏感数据使用 AES-256 加密存储在印度本地服务器,符合RBI规定
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 交易历史视图 -->
+          <div v-if="currentView === 'history'" class="glass rounded-2xl p-8 shadow-xl">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">交易历史</h2>
+            
+            <div class="space-y-3">
+              <div v-for="tx in transactions" :key="tx.id" class="transaction-item bg-white rounded-xl p-4 border border-gray-100">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-4">
+                    <div :class="tx.type === 'transfer' ? 'bg-red-100' : 'bg-green-100'" class="w-12 h-12 rounded-full flex items-center justify-center">
+                      <span class="text-2xl">{{ tx.type === 'transfer' ? '↑' : '↓' }}</span>
+                    </div>
+                    <div>
+                      <p class="font-semibold text-gray-800">
+                        {{ tx.type === 'transfer' ? tx.recipient : tx.sender || tx.service }}
+                      </p>
+                      <p class="text-sm text-gray-500">{{ tx.recipientUPI || tx.senderUPI || tx.method }}</p>
+                      <p class="text-xs text-gray-400 mt-1">
+                        {{ tx.timestamp.toLocaleString('zh-CN') }}
+                      </p>
+                      <p class="text-xs text-gray-400 font-mono">ID: {{ tx.id }}</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <p :class="tx.amount > 0 ? 'text-green-600' : 'text-red-600'" class="text-xl font-bold">
+                      {{ tx.amount > 0 ? '+' : '' }}{{ formatAmount(tx.amount) }}
+                    </p>
+                    <span class="status-badge mt-2" :class="tx.status === 'success' ? 'bg-green-100 text-green-800' : tx.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'">
+                      {{ tx.status === 'success' ? '成功' : tx.status === 'pending' ? '处理中' : '失败' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 钱包视图 -->
+          <div v-if="currentView === 'wallet'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass rounded-2xl p-8 shadow-xl">
+              <h2 class="text-2xl font-bold text-gray-800 mb-6">钱包详情</h2>
+              
+              <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
+                <p class="text-white/80 text-sm mb-2">当前余额</p>
+                <p class="text-4xl font-bold mb-4">{{ formattedBalance }}</p>
+                <div class="flex justify-between items-center">
+                  <div>
+                    <p class="text-white/80 text-xs">UPI ID</p>
+                    <p class="font-mono text-sm">{{ user.upiId }}</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-white/80 text-xs">KYC等级</p>
+                    <p class="font-bold">{{ user.kycTier.toUpperCase() }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <button class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold transition-all">
+                  ➕ 充值到钱包
+                </button>
+                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition-all">
+                  💳 添加银行卡
+                </button>
+              </div>
+            </div>
+
+            <div class="glass rounded-2xl p-8 shadow-xl">
+              <h2 class="text-2xl font-bold text-gray-800 mb-6">账户限额</h2>
+              
+              <div class="space-y-4">
+                <div class="bg-blue-50 rounded-xl p-4">
+                  <div class="flex justify-between mb-2">
+                    <span class="font-semibold text-gray-700">日限额</span>
+                    <span class="font-bold text-blue-600">₹{{ kycLimits.daily.toLocaleString('en-IN') }}</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: 60%"></div>
+                  </div>
+                  <p class="text-xs text-gray-600 mt-2">已使用 60%</p>
+                </div>
+
+                <div class="bg-purple-50 rounded-xl p-4">
+                  <div class="flex justify-between mb-2">
+                    <span class="font-semibold text-gray-700">月限额</span>
+                    <span class="font-bold text-purple-600">₹{{ kycLimits.monthly.toLocaleString('en-IN') }}</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-purple-600 h-2 rounded-full" style="width: 35%"></div>
+                  </div>
+                  <p class="text-xs text-gray-600 mt-2">已使用 35%</p>
+                </div>
+
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mt-4">
+                  <p class="text-sm text-yellow-800">
+                    💡 <strong>提示</strong>: 升级到 TIER 3 可提高限额至 ₹10,00,000/月
+                  </p>
+                  <button @click="currentView = 'kyc'" class="mt-2 text-yellow-700 font-semibold text-sm hover:text-yellow-900">
+                    立即升级 →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 页脚 -->
+          <div class="glass rounded-2xl p-6 mt-6 shadow-xl">
+            <div class="flex flex-wrap justify-between items-center gap-4 text-sm text-gray-600">
+              <div class="flex gap-6">
+                <span>🔒 PCI-DSS Level 1 认证</span>
+                <span>🇮🇳 RBI合规</span>
+                <span>⚡ NPCI认证</span>
+              </div>
+              <div>
+                <span>© 2025 PaySecure | 技术支持: Vue 3 + Composition API</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+    }).mount('#app');
+  </script>
+</body>
+</html>

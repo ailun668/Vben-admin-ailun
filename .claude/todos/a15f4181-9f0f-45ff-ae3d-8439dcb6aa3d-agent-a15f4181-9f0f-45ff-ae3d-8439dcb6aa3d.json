@@ -1,0 +1,32 @@
+[
+  {
+    "content": "分析现有项目结构和组件",
+    "status": "completed",
+    "activeForm": "正在分析现有项目结构和组件"
+  },
+  {
+    "content": "创建博客列表页面和文章详情页",
+    "status": "completed",
+    "activeForm": "正在创建博客列表页面和文章详情页"
+  },
+  {
+    "content": "完善AI工具展示功能",
+    "status": "completed",
+    "activeForm": "正在完善AI工具展示功能"
+  },
+  {
+    "content": "创建关于页面展示个人信息",
+    "status": "in_progress",
+    "activeForm": "正在创建关于页面展示个人信息"
+  },
+  {
+    "content": "添加更多博客内容和AI工具数据",
+    "status": "pending",
+    "activeForm": "正在添加更多博客内容和AI工具数据"
+  },
+  {
+    "content": "优化响应式设计和用户体验",
+    "status": "pending",
+    "activeForm": "正在优化响应式设计和用户体验"
+  }
+]

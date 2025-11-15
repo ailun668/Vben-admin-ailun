@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__playwright-mcp__browser_navigate",
+      "mcp__playwright-mcp__browser_click",
+      "mcp__playwright-mcp__browser_snapshot",
+      "mcp__playwright-mcp__browser_run_code",
+      "mcp__playwright-mcp__browser_wait_for",
+      "Bash(npm run dev:*)",
+      "mcp__playwright-mcp__browser_press_key",
+      "mcp__playwright-mcp__browser_take_screenshot",
+      "mcp__playwright-mcp__browser_evaluate"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

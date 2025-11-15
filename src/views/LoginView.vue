@@ -17,6 +17,7 @@
             v-model:value="formState.username"
             placeholder="请输入用户名"
             size="large"
+            autocomplete="username"
           >
             <template #prefix>
               <user-outlined />
@@ -29,6 +30,7 @@
             v-model:value="formState.password"
             placeholder="请输入密码"
             size="large"
+            autocomplete="current-password"
           >
             <template #prefix>
               <lock-outlined />
@@ -105,9 +107,13 @@ async function onFinish() {
     // 生成可访问的路由
     permissionStore.generateRoutes(result.user.roles)
 
-    // 重定向到首页
+    // 获取重定向路径（从路由查询参数中获取，如果没有则跳转到首页）
+    const redirect = (router.currentRoute.value.query.redirect as string) || '/'
+
+    // 延迟跳转，确保路由已更新
+    // 路由守卫会自动处理动态路由的添加
     setTimeout(() => {
-      router.push('/')
+      router.push(redirect)
     }, 500)
   } catch (error) {
     message.error((error as any)?.message || '登录失败')

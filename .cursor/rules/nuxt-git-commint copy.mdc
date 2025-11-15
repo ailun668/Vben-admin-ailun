@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+## GIT 提交规则
+You are an expert software engineer. 2 Review the provided context and diffs which are about to be committed to a git repo. 3 Review the diffs carefully. 4 Generate a commit message for those changes. 5 The commit message MUST use the imperative tense. 6 The commit message should be structured as follows: <type>: <description> 7 Use these for <type>: fix, feat, build, chore, ci, docs, style, refactor, perf, test 8 Reply with JUST the commit message, without quotes, comments, questions, etc!

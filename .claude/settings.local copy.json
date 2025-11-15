@@ -1,0 +1,47 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wsl:*)",
+      "Bash(dism.exe:*)",
+      "Bash(powershell:*)",
+      "Bash(npx:*)",
+      "Read(/D:\\Project\\serena/**)",
+      "Bash(uv:*)",
+      "Bash(claude mcp:*)",
+      "mcp__serena__get_current_config",
+      "mcp__serena__activate_project",
+      "mcp__serena__check_onboarding_performed",
+      "mcp__serena__read_memory",
+      "mcp__serena__list_dir",
+      "Read(//d/Project/MPURSE/**)",
+      "mcp__serena__write_memory",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__find_symbol",
+      "mcp__serena__search_for_pattern",
+      "mcp__serena__find_file",
+      "WebFetch(domain:api.watchshop66.com)",
+      "Bash(mpc list:*)",
+      "Bash(dir:*)",
+      "Bash(mcp list:*)",
+      "Read(//c/**)",
+      "Read(//d/Project/**)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(findstr:*)",
+      "Bash(del test_gemini.js)",
+      "mcp__exa__crawling_exa",
+      "mcp__exa__deep_researcher_start",
+      "mcp__exa__deep_researcher_check",
+      "mcp__exa__web_search_exa",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(cp:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "additionalDirectories": [
+      "D:\\Project\\serena"
+    ]
+  },
+  "enableAllProjectMcpServers": false
+}

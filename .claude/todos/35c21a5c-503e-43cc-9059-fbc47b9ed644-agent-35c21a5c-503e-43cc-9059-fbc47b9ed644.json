@@ -1,0 +1,27 @@
+[
+  {
+    "content": "创建基于ultrathink理念的开发方法论文档",
+    "status": "completed",
+    "id": "1"
+  },
+  {
+    "content": "整合技术栈依赖架构指导",
+    "status": "completed",
+    "id": "2"
+  },
+  {
+    "content": "设计需求开发流程",
+    "status": "completed",
+    "id": "3"
+  },
+  {
+    "content": "制定bug修复标准流程",
+    "status": "completed",
+    "id": "4"
+  },
+  {
+    "content": "建立版本迭代管理体系",
+    "status": "completed",
+    "id": "5"
+  }
+]

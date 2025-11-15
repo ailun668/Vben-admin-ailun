@@ -1,0 +1,27 @@
+[
+  {
+    "content": "启动 Notepad++ 并打开 Plugins Admin",
+    "status": "in_progress",
+    "activeForm": "启动 Notepad++ 并打开 Plugins Admin"
+  },
+  {
+    "content": "安装核心开发插件 (JSON Viewer, XML Tools, AutoSave)",
+    "status": "pending",
+    "activeForm": "安装核心开发插件"
+  },
+  {
+    "content": "安装增强插件 (MarkdownViewer++, Compare, Explorer)",
+    "status": "pending",
+    "activeForm": "安装增强插件"
+  },
+  {
+    "content": "配置插件快捷键和设置",
+    "status": "pending",
+    "activeForm": "配置插件快捷键和设置"
+  },
+  {
+    "content": "验证所有插件正常工作",
+    "status": "pending",
+    "activeForm": "验证所有插件正常工作"
+  }
+]

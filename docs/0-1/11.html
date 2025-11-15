@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="filename" content="dashboard_workbench.html">
+    <title>Dashboard Workbench</title>
+    <!-- Font Awesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ECharts 图表库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --primary: #3a7bfd;
+            --secondary: #5c6bc0;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --border-color: #dee2e6;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 1rem;
+        }
+        
+        .dashboard-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+        
+        /* 顶部导航 */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 2rem;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        /* 页面标题 */
+        .page-header {
+            padding: 1.5rem 2rem;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-subtitle {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+        
+        /* KPI卡片区域 */
+        .kpi-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 0 2rem;
+        }
+        
+        .kpi-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+        
+        .kpi-card-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .kpi-card-name {
+            font-size: 1rem;
+            color: var(--gray);
+        }
+        
+        .kpi-card-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .kpi-card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .kpi-card-trend {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .trend-up {
+            color: var(--success);
+        }
+        
+        .trend-down {
+            color: var(--danger);
+        }
+        
+        /* 图表区域 */
+        .chart-section {
+            margin: 2rem 0;
+            padding: 0 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .chart-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 350px;
+        }
+        
+        /* 进度卡片 */
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .progress-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .progress-title {
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .progress-item {
+            margin-bottom: 1.2rem;
+        }
+        
+        .progress-heading {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--gray-light);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-value {
+            height: 100%;
+            border-radius: 5px;
+        }
+        
+        /* 表格样式 */
+        .table-container {
+            margin-top: 2rem;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .recent-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .recent-table th {
+            background: #f8f9fa;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .recent-table td {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: rgba(76, 175, 80, 0.15);
+            color: var(--success);
+        }
+        
+        .status-pending {
+            background: rgba(255, 152, 0, 0.15);
+            color: var(--warning);
+        }
+        
+        .status-completed {
+            background: rgba(58, 123, 253, 0.15);
+            color: var(--primary);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .kpi-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .progress-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .top-nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- 顶部导航 -->
+        <div class="top-nav">
+            <div class="logo">系统工作台</div>
+            <div class="user-info">
+                <div class="notification">
+                    <i class="far fa-bell"></i>
+                </div>
+                <div class="user-avatar">JD</div>
+                <div class="user-name">管理员</div>
+            </div>
+        </div>
+        
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1 class="page-title">数据分析工作台</h1>
+            <p class="page-subtitle">实时监控系统关键指标和业务数据</p>
+        </div>
+        
+        <!-- KPI卡片区域 -->
+        <div class="kpi-cards">
+            <div class="kpi-card">
+                <div class="kpi-card-title">
+                    <div class="kpi-card-name">总访问量</div>
+                    <div class="kpi-card-icon" style="background-color: var(--primary);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="kpi-card-value">42,567</div>
+                <div class="kpi-card-trend trend-up">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>12.5% 较上月</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-card-title">
+                    <div class="kpi-card-name">总收入</div>
+                    <div class="kpi-card-icon" style="background-color: var(--success);">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                </div>
+                <div class="kpi-card-value">¥826,450</div>
+                <div class="kpi-card-trend trend-up">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>8.3% 较上月</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-card-title">
+                    <div class="kpi-card-name">订单数</div>
+                    <div class="kpi-card-icon" style="background-color: var(--warning);">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                </div>
+                <div class="kpi-card-value">3,842</div>
+                <div class="kpi-card-trend trend-down">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>2.1% 较上月</span>
+                </div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-card-title">
+                    <div class="kpi-card-name">转换率</div>
+                    <div class="kpi-card-icon" style="background-color: var(--secondary);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+                <div class="kpi-card-value">24.6%</div>
+                <div class="kpi-card-trend trend-up">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>3.7% 较上月</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 图表区域 -->
+        <div class="chart-section">
+            <h2 class="section-title">
+                <i class="fas fa-chart-area"></i>
+                趋势分析
+            </h2>
+            
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h3 class="chart-title">月度访问量分析</h3>
+                    <div class="chart-container" id="line-chart"></div>
+                </div>
+                
+                <div class="chart-card">
+                    <h3 class="chart-title">收入来源分布</h3>
+                    <div class="chart-container" id="bar-chart"></div>
+                </div>
+            </div>
+            
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h3 class="chart-title">用户地域分布</h3>
+                    <div class="chart-container" id="pie-chart"></div>
+                </div>
+                
+                <div class="chart-card">
+                    <h3 class="chart-title">任务完成情况</h3>
+                    <div class="progress-grid">
+                        <div class="progress-card">
+                            <div class="progress-title">项目进度</div>
+                            <div class="progress-item">
+                                <div class="progress-heading">
+                                    <span>产品研发</span>
+                                    <span>75%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-value" style="width: 75%; background-color: var(--primary);"></div>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="progress-heading">
+                                    <span>市场推广</span>
+                                    <span>42%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-value" style="width: 42%; background-color: var(--warning);"></div>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <div class="progress-heading">
+                                    <span>客户支持</span>
+                                    <span>91%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-value" style="width: 91%; background-color: var(--success);"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-card">
+                            <div class="chart-container" id="gauge-chart"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 最近活动 -->
+        <div class="chart-section">
+            <h2 class="section-title">
+                <i class="fas fa-list"></i>
+                最近活动记录
+            </h2>
+            
+            <div class="table-container">
+                <table class="recent-table">
+                    <thead>
+                        <tr>
+                            <th>任务</th>
+                            <th>负责人</th>
+                            <th>截止时间</th>
+                            <th>状态</th>
+                            <th>进度</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>季度财务报告</td>
+                            <td>张经理</td>
+                            <td>2023-09-30</td>
+                            <td><span class="status-badge status-active">进行中</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-value" style="width: 65%; background-color: var(--primary);"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>系统安全升级</td>
+                            <td>王技术</td>
+                            <td>2023-09-28</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-value" style="width: 100%; background-color: var(--success);"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>新员工培训计划</td>
+                            <td>李主管</td>
+                            <td>2023-10-10</td>
+                            <td><span class="status-badge status-pending">待开始</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-value" style="width: 0%; background-color: var(--warning);"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>移动端改版</td>
+                            <td>陈设计</td>
+                            <td>2023-10-15</td>
+                            <td><span class="status-badge status-active">进行中</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-value" style="width: 30%; background-color: var(--primary);"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>客户满意度调查</td>
+                            <td>赵专员</td>
+                            <td>2023-10-05</td>
+                            <td><span class="status-badge status-active">进行中</span></td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-value" style="width: 50%; background-color: var(--primary);"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 折线图 - 月度访问量
+            const lineChart = echarts.init(document.getElementById('line-chart'));
+            const lineOption = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['访问量', '新增用户']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月']
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        name: '访问量',
+                        type: 'line',
+                        smooth: true,
+                        data: [12000, 16000, 14500, 18200, 20800, 23400, 25600, 19800, 24500],
+                        lineStyle: {
+                            width: 3
+                        },
+                        itemStyle: {
+                            color: '#3a7bfd'
+                        }
+                    },
+                    {
+                        name: '新增用户',
+                        type: 'line',
+                        smooth: true,
+                        data: [3200, 3800, 4200, 4800, 5200, 5600, 5100, 4700, 5200],
+                        lineStyle: {
+                            width: 3
+                        },
+                        itemStyle: {
+                            color: '#4caf50'
+                        }
+                    }
+                ]
+            };
+            lineChart.setOption(lineOption);
+            
+            // 柱状图 - 收入来源分布
+            const barChart = echarts.init(document.getElementById('bar-chart'));
+            const barOption = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['2022年', '2023年']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['产品A', '产品B', '产品C', '产品D', '服务']
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        name: '2022年',
+                        type: 'bar',
+                        data: [125000, 98000, 105000, 117000, 86000],
+                        itemStyle: {
+                            color: '#5c6bc0'
+                        }
+                    },
+                    {
+                        name: '2023年',
+                        type: 'bar',
+                        data: [180000, 125000, 142000, 156000, 105000],
+                        itemStyle: {
+                            color: '#3a7bfd'
+                        }
+                    }
+                ]
+            };
+            barChart.setOption(barOption);
+            
+            // 饼图 - 用户地域分布
+            const pieChart = echarts.init(document.getElementById('pie-chart'));
+            const pieOption = {
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'vertical',
+                    right: 10,
+                    top: 'center'
+                },
+                series: [
+                    {
+                        name: '地域分布',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 10,
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: '18',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        data: [
+                            { value: 42, name: '华东地区' },
+                            { value: 25, name: '华北地区' },
+                            { value: 18, name: '华南地区' },
+                            { value: 8, name: '西南地区' },
+                            { value: 7, name: '其他地区' }
+                        ],
+                        color: ['#3a7bfd', '#4caf50', '#ff9800', '#5c6bc0', '#f44336']
+                    }
+                ]
+            };
+            pieChart.setOption(pieOption);
+            
+            // 仪表盘图表
+            const gaugeChart = echarts.init(document.getElementById('gauge-chart'));
+            const gaugeOption = {
+                series: [
+                    {
+                        type: 'gauge',
+                        startAngle: 180,
+                        endAngle: 0,
+                        progress: {
+                            show: true,
+                            width: 18
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                width: 18
+                            }
+                        },
+                        axisTick: {
+                            show: false
+                        },
+                        splitLine: {
+                            length: 15,
+                            lineStyle: {
+                                width: 2,
+                                color: '#999'
+                            }
+                        },
+                        axisLabel: {
+                            distance: -30,
+                            color: '#999',
+                            fontSize: 12
+                        },
+                        anchor: {
+                            show: true,
+                            showAbove: true,
+                            size: 25,
+                            itemStyle: {
+                                borderWidth: 8
+                            }
+                        },
+                        title: {
+                            show: false
+                        },
+                        detail: {
+                            valueAnimation: true,
+                            fontSize: 40,
+                            offsetCenter: [0, '-20%'],
+                            formatter: '{value}%',
+                            color: 'inherit'
+                        },
+                        data: [
+                            {
+                                value: 75,
+                                name: '整体完成率',
+                                itemStyle: {
+                                    color: '#3a7bfd'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            };
+            gaugeChart.setOption(gaugeOption);
+            
+            // 响应式布局 - 监听窗口变化
+            window.addEventListener('resize', function() {
+                lineChart.resize();
+                barChart.resize();
+                pieChart.resize();
+                gaugeChart.resize();
+            });
+        });
+    </script>
+</body>
+</html>

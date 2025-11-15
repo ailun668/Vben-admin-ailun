@@ -1,0 +1,22 @@
+[
+  {
+    "content": "创建Python基础学习环境和结构",
+    "status": "completed",
+    "activeForm": "创建Python基础学习环境和结构"
+  },
+  {
+    "content": "设置Python开发环境（Python安装和VS Code配置）",
+    "status": "completed",
+    "activeForm": "设置Python开发环境"
+  },
+  {
+    "content": "创建Python语法对比JS的学习材料",
+    "status": "in_progress",
+    "activeForm": "创建Python语法对比学习材料"
+  },
+  {
+    "content": "准备实践项目和练习题",
+    "status": "pending",
+    "activeForm": "准备实践项目和练习题"
+  }
+]

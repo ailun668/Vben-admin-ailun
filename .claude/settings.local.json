@@ -1,16 +1,25 @@
 {
   "permissions": {
     "allow": [
-      "mcp__skill-seeker__list_configs",
-      "Bash(dir:*)",
-      "Bash(tree:*)",
-      "Bash(npm run dev:*)",
-      "Bash(wc:*)",
-      "Bash(npm run build:*)",
-      "Skill(CLAUDE-BUG-FIX)",
-      "Bash(timeout 10 npm run dev:*)"
+      "Bash(cat:*)",
+      "Bash(dir /s D:projectcursor规则skills 2)",
+      "Bash(nul)",
+      "Bash(powershell \"Get-ChildItem -Path ''D:\\project\\cursor规则\\skills'' -Recurse -File | Select-Object FullName | Format-Table -AutoSize\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "mcp__skill-seeker__scrape_github",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__skill-seeker__generate_config",
+      "mcp__skill-seeker__estimate_pages",
+      "Bash(powershell:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
-    "ask": []
-  }
+    "ask": [],
+    "additionalDirectories": [
+      "D:\\Project\\serena"
+    ]
+  },
+  "enableAllProjectMcpServers": false
 }

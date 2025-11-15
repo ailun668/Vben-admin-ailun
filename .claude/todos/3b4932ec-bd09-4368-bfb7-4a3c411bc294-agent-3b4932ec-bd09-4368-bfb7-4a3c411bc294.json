@@ -1,0 +1,22 @@
+[
+  {
+    "content": "Explore project structure and identify key directories",
+    "status": "completed"
+  },
+  {
+    "content": "Read package.json files to understand dependencies and scripts",
+    "status": "completed"
+  },
+  {
+    "content": "Check for existing documentation (README, .cursorrules, etc.)",
+    "status": "completed"
+  },
+  {
+    "content": "Analyze code architecture and patterns",
+    "status": "completed"
+  },
+  {
+    "content": "Create CLAUDE.md with essential information",
+    "status": "in_progress"
+  }
+]

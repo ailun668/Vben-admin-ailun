@@ -1,0 +1,566 @@
+---
+description: AI 辅助编程的核心编码规范，涵盖代码质量、类型安全、性能优化、安全性和最佳实践。确保 AI 生成的代码符合项目标准。
+globs: **/*.{ts,tsx,js,jsx,vue}
+---
+
+# AI 编码规范核心原则
+
+## 1. 禁止事项 (Never Do)
+
+### 1.1 类型安全
+```typescript
+// ❌ 禁止：使用 any 类型
+function process(data: any) { }
+
+// ✅ 正确：明确类型定义
+interface DataItem {
+  id: string;
+  value: number;
+}
+function process(data: DataItem[]) { }
+```
+
+### 1.2 变量声明
+```typescript
+// ❌ 禁止：使用 var
+var count = 0;
+
+// ✅ 正确：使用 const/let
+const MAX_COUNT = 100;
+let currentCount = 0;
+```
+
+### 1.3 相等比较
+```typescript
+// ❌ 禁止：使用 == 或 !=
+if (value == null) { }
+if (count != 0) { }
+
+// ✅ 正确：使用 === 或 !==
+if (value === null) { }
+if (count !== 0) { }
+```
+
+### 1.4 三元表达式
+```typescript
+// ❌ 禁止：嵌套三元表达式
+const value = a ? b : c ? d : e ? f : g;
+
+// ✅ 正确：使用 if-else 或辅助函数
+function getValue(): number {
+  if (a) return b;
+  if (c) return d;
+  if (e) return f;
+  return g;
+}
+```
+
+### 1.5 代码嵌套
+```typescript
+// ❌ 禁止：超过 3 层嵌套
+if (a) {
+  if (b) {
+    if (c) {
+      if (d) {
+        // 太深了！
+      }
+    }
+  }
+}
+
+// ✅ 正确：提前返回，减少嵌套
+function process() {
+  if (!a) return;
+  if (!b) return;
+  if (!c) return;
+  if (!d) return;
+  // 主要逻辑
+}
+```
+
+## 2. 必须遵守 (Always Do)
+
+### 2.1 函数规范
+```typescript
+// ✅ 使用箭头函数
+const double = (x: number): number => x * 2;
+
+// ✅ 对象参数（超过 3 个参数时）
+interface CreateUserParams {
+  name: string;
+  email: string;
+  age: number;
+  city: string;
+}
+function createUser(params: CreateUserParams) { }
+
+// ✅ 默认参数
+function greet(name: string = 'Guest'): string {
+  return `Hello, ${name}`;
+}
+```
+
+### 2.2 异步编程
+```typescript
+// ✅ 使用 async/await，完整错误处理
+async function fetchData(): Promise<Data> {
+  try {
+    const response = await fetch('/api/data');
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch:', error);
+    throw error;
+  }
+}
+
+// ✅ 并行异步操作
+const [users, posts, comments] = await Promise.all([
+  fetchUsers(),
+  fetchPosts(),
+  fetchComments(),
+]);
+```
+
+### 2.3 空值处理
+```typescript
+// ✅ 使用可选链和空值合并
+const userName = user?.profile?.name ?? 'Anonymous';
+const items = data?.items ?? [];
+const count = config?.count ?? 0;
+```
+
+### 2.4 数组操作
+```typescript
+// ✅ 使用数组方法代替循环
+const doubled = numbers.map(n => n * 2);
+const evens = numbers.filter(n => n % 2 === 0);
+const sum = numbers.reduce((acc, n) => acc + n, 0);
+
+// ✅ 使用解构和展开运算符
+const { name, email } = user;
+const [first, ...rest] = items;
+const newUser = { ...user, age: 30 };
+const newItems = [...items, 4, 5, 6];
+```
+
+## 3. Vue 3 组件规范
+
+### 3.1 组件结构（固定顺序）
+```vue
+<script setup lang="ts">
+// 1. 导入依赖
+import { ref, computed, onMounted } from 'vue';
+import type { User } from '@/types';
+
+// 2. Props 定义
+interface Props {
+  userId: string;
+  initialData?: User;
+}
+const props = withDefaults(defineProps<Props>(), {
+  initialData: undefined,
+});
+
+// 3. Emits 定义
+interface Emits {
+  (e: 'update', user: User): void;
+  (e: 'delete', id: string): void;
+}
+const emit = defineEmits<Emits>();
+
+// 4. 响应式状态
+const user = ref<User | null>(null);
+const loading = ref(false);
+
+// 5. 计算属性
+const displayName = computed(() =>
+  user.value ? `${user.value.firstName} ${user.value.lastName}` : 'Unknown'
+);
+
+// 6. 方法
+async function fetchUser() {
+  loading.value = true;
+  try {
+    const response = await fetch(`/api/users/${props.userId}`);
+    user.value = await response.json();
+  } finally {
+    loading.value = false;
+  }
+}
+
+// 7. 生命周期
+onMounted(() => {
+  fetchUser();
+});
+</script>
+
+<template>
+  <div class="user-profile">
+    <div v-if="loading">Loading...</div>
+    <div v-else-if="user">
+      <h2>{{ displayName }}</h2>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.user-profile {
+  padding: 20px;
+}
+</style>
+```
+
+### 3.2 响应式数据
+```typescript
+// ✅ 基础类型使用 ref
+const count = ref(0);
+const name = ref('John');
+
+// ✅ 对象使用 reactive 或 ref
+const user = reactive({
+  name: 'John',
+  age: 30,
+});
+// 或
+const userRef = ref<User>({
+  id: '1',
+  name: 'John',
+});
+```
+
+### 3.3 Props 处理
+```typescript
+// ❌ 禁止：直接修改 props
+const props = defineProps<{ count: number }>();
+props.count++; // 错误！
+
+// ✅ 正确：使用本地状态或 emit
+const localCount = ref(props.count);
+// 或
+const emit = defineEmits<{
+  (e: 'update:count', value: number): void;
+}>();
+function increment() {
+  emit('update:count', props.count + 1);
+}
+```
+
+### 3.4 性能优化
+```vue
+<!-- ✅ 频繁切换：使用 v-show -->
+<div v-show="isVisible">Content</div>
+
+<!-- ✅ 条件渲染：使用 v-if -->
+<div v-if="userRole === 'admin'">Admin Panel</div>
+
+<!-- ✅ 列表渲染：使用唯一 key -->
+<div v-for="item in items" :key="item.id">
+  {{ item.name }}
+</div>
+```
+
+## 4. 安全性规范
+
+### 4.1 XSS 防护
+```vue
+<!-- ❌ 危险：v-html 用于用户输入 -->
+<div v-html="userInput"></div>
+
+<!-- ✅ 安全：使用文本插值 -->
+<div>{{ userInput }}</div>
+```
+
+### 4.2 敏感信息
+```typescript
+// ❌ 禁止：硬编码敏感信息
+const API_KEY = 'sk-1234567890';
+console.log('Password:', user.password);
+
+// ✅ 正确：使用环境变量
+const API_KEY = import.meta.env.VITE_API_KEY;
+console.log('User login:', { userId: user.id });
+```
+
+### 4.3 API 调用
+```typescript
+// ✅ 包含错误处理和验证
+async function submitData(data: FormData) {
+  try {
+    const response = await fetch('/api/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': getCsrfToken(),
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Submit failed:', error);
+    showErrorNotification('提交失败，请重试');
+    throw error;
+  }
+}
+```
+
+## 5. 性能优化规范
+
+### 5.1 代码分割
+```typescript
+// ✅ 路由懒加载
+const routes = [
+  {
+    path: '/dashboard',
+    component: () => import('@/views/dashboard.vue'),
+  },
+];
+
+// ✅ 组件懒加载
+import { defineAsyncComponent } from 'vue';
+const HeavyComponent = defineAsyncComponent(() =>
+  import('@/components/HeavyComponent.vue')
+);
+```
+
+### 5.2 防抖和节流
+```typescript
+import { debounce, throttle } from 'lodash-es';
+
+// ✅ 搜索输入 - 防抖
+const handleSearch = debounce((keyword: string) => {
+  searchAPI(keyword);
+}, 300);
+
+// ✅ 滚动事件 - 节流
+const handleScroll = throttle(() => {
+  updatePosition();
+}, 100);
+```
+
+### 5.3 内存管理
+```typescript
+// ✅ 清理副作用
+import { onUnmounted } from 'vue';
+
+const timer = setInterval(() => {
+  console.log('Tick');
+}, 1000);
+
+onUnmounted(() => {
+  clearInterval(timer);
+});
+```
+
+## 6. 错误处理规范
+
+### 6.1 完整的错误处理
+```typescript
+async function fetchData() {
+  try {
+    const response = await fetch('/api/data');
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    // 1. 记录错误
+    console.error('Failed to fetch data:', error);
+
+    // 2. 用户友好提示
+    showErrorNotification('无法加载数据，请稍后重试');
+
+    // 3. 错误上报（可选）
+    reportError(error);
+
+    // 4. 重新抛出或返回默认值
+    throw error;
+  }
+}
+```
+
+### 6.2 全局错误处理
+```typescript
+// main.ts
+app.config.errorHandler = (err, instance, info) => {
+  console.error('Global error:', err);
+  sendErrorToMonitoring(err, { component: instance, info });
+};
+```
+
+## 7. 文档和注释
+
+### 7.1 JSDoc 注释
+```typescript
+/**
+ * 获取用户列表
+ *
+ * @param params - 查询参数
+ * @param params.page - 页码，从 1 开始
+ * @param params.pageSize - 每页条数
+ * @returns 用户列表和总数
+ * @throws {Error} 当网络请求失败时
+ *
+ * @example
+ * ```typescript
+ * const result = await getUserList({ page: 1, pageSize: 20 });
+ * ```
+ */
+async function getUserList(params: UserListParams): Promise<UserListResult> {
+  // 实现
+}
+```
+
+### 7.2 类型注释
+```typescript
+/**
+ * 用户信息接口
+ */
+interface User {
+  /** 用户唯一标识 */
+  id: string;
+
+  /** 用户名（用于登录） */
+  username: string;
+
+  /**
+   * 用户角色
+   * - admin: 管理员
+   * - user: 普通用户
+   * - guest: 访客
+   */
+  role: 'admin' | 'user' | 'guest';
+
+  /** 账户状态，1 启用，0 禁用 */
+  status: 0 | 1;
+}
+```
+
+## 8. 项目特定规范
+
+### 8.1 路径别名
+```typescript
+// ✅ 使用 #/ 别名（本项目约定）
+import { useUserStore } from '#/store/user';
+import type { User } from '#/types/user';
+
+// ❌ 避免相对路径
+import { useUserStore } from '../../stores/user';
+```
+
+### 8.2 API 调用规范
+```typescript
+// ✅ 使用项目的 requestClient
+import { requestClient } from '#/api/request';
+
+// 定义 API 命名空间
+export namespace UserApi {
+  export interface User {
+    id: string;
+    name: string;
+    email: string;
+  }
+
+  export interface UserListParams {
+    page?: number;
+    pageSize?: number;
+  }
+}
+
+// API 函数
+async function getUserList(params?: UserApi.UserListParams) {
+  return requestClient.get<UserApi.User[]>('/api/users', { params });
+}
+```
+
+### 8.3 Mock 数据开关
+```typescript
+// ✅ Mock 开关集成模式
+import { requestClient } from '#/api/request';
+import { isSystemMockEnabled, mockGetUsers } from '#/mocks/system/user';
+
+async function getUsers(params?: UserApi.UserListParams) {
+  if (isSystemMockEnabled()) {
+    return mockGetUsers(params ?? {});
+  }
+  return requestClient.get<UserApi.UserListResult>('/api/users', { params });
+}
+```
+
+## 9. 提交前检查清单
+
+在提交代码前，确保：
+
+- [ ] 代码符合 ESLint 规范（无错误）
+- [ ] TypeScript 类型检查通过
+- [ ] 删除所有调试代码（console.log, debugger）
+- [ ] 没有硬编码的敏感信息
+- [ ] 添加了必要的 JSDoc 注释
+- [ ] 更新了相关文档
+- [ ] Commit message 符合规范
+- [ ] 所有测试用例通过
+
+## 10. 命名规范速查
+
+### 变量和函数
+```typescript
+// ✅ 小驼峰
+const userName = 'John';
+function getUserById() { }
+
+// ✅ 布尔值前缀
+const isActive = true;
+const hasPermission = false;
+const shouldUpdate = true;
+
+// ✅ 常量大写下划线
+const MAX_COUNT = 100;
+const API_BASE_URL = '/api';
+```
+
+### 组件和类
+```typescript
+// ✅ 大驼峰
+class UserManager { }
+interface UserProfile { }
+
+// Vue 组件文件
+UserProfile.vue
+UserList.vue
+```
+
+## 快速记忆
+
+**代码规范 5 不要**：
+1. 不要用 any
+2. 不要用 var
+3. 不要用 ==
+4. 不要嵌套三元
+5. 不要深层嵌套
+
+**Vue 开发 5 要点**：
+1. 要用 Composition API
+2. 要定义 Props 类型
+3. 要用 computed 缓存
+4. 要用唯一 key
+5. 要清理副作用
+
+**安全开发 5 准则**：
+1. 环境变量存密钥
+2. 用户输入要验证
+3. 不用 innerHTML
+4. 敏感信息不打印
+5. HTTPS + CSRF Token
+
+---
+
+**注意**：此规范应作为所有 AI 辅助编程的基础标准。任何 AI 生成的代码都必须严格遵守这些规则。

@@ -1,0 +1,32 @@
+[
+  {
+    "content": "设计企业级前端展示策略和内容架构",
+    "status": "completed",
+    "activeForm": "设计企业级前端展示策略和内容架构"
+  },
+  {
+    "content": "创建技术深度展示的核心页面",
+    "status": "completed",
+    "activeForm": "创建技术深度展示的核心页面"
+  },
+  {
+    "content": "实现AI+前端融合的创新功能",
+    "status": "in_progress",
+    "activeForm": "实现AI+前端融合的创新功能"
+  },
+  {
+    "content": "建设项目作品集和技术案例",
+    "status": "completed",
+    "activeForm": "建设项目作品集和技术案例"
+  },
+  {
+    "content": "优化代码质量展示和工程化水平",
+    "status": "pending",
+    "activeForm": "优化代码质量展示和工程化水平"
+  },
+  {
+    "content": "添加实时数据展示和技术监控",
+    "status": "pending",
+    "activeForm": "添加实时数据展示和技术监控"
+  }
+]

@@ -1,0 +1,785 @@
+---
+alwaysApply: true
+---
+
+
+## MPurse 技术文档地址
+
+-如果你不确定文件内容或者代码结构， 请使用工具读取文件和相关信息，
+-每次修改需要专注问题本身，只允许改动优化修复我需要的需求。
+
+- https://github.com/vbenjs/vue-vben-admin
+- https://antdv.com/docs/vue/introduce
+- https://v3.cn.vuejs.org/
+- https://pinia.vuejs.org/
+- https://tailwindcss.com/
+
+# MPurse 项目开发技术文档
+
+> **面向AI开发者的完整技术规范文档**
+> 确保项目100%正确交付，无缺陷运行
+
+## 📋 文档概述
+
+本文档为 MPurse 支付管理平台的完整技术开发文档，专门为AI开发者设计，包含项目技术栈、开发规范、架构设计、调试指南等，确保新接手的开发者能够：
+
+- ✅ **快速理解项目架构**
+- ✅ **掌握核心技术栈**
+- ✅ **遵循开发规范**
+- ✅ **保证代码质量**
+- ✅ **避免常见错误**
+
+---
+
+## 🏗️ 项目架构概览
+
+### 项目类型
+- **架构模式**: Monorepo 单体仓库
+- **构建工具**: Turbo + pnpm workspaces
+- **包管理器**: pnpm@10.14.0（**强制要求**）
+
+### 核心应用
+```
+apps/
+├── mpurse-central/     # 中央管理后台 (端口: 5566)
+└── mpurse-merchant/    # 商户端应用 (端口: 5588)
+```
+
+### 共享模块
+```
+shared/
+├── components/         # 共享Vue组件
+├── utils/             # 通用工具函数
+├── constants/         # 共享常量配置
+├── request/           # HTTP客户端封装
+└── store/            # 共享状态管理
+
+internal/
+├── vite-config/       # Vite配置
+├── eslint-config/     # ESLint配置
+├── tailwind-config/   # Tailwind配置
+└── tsconfig/         # TypeScript配置
+```
+
+---
+
+## 🛠️ 技术栈详解
+
+### 🎯 核心框架
+| 技术 | 版本 | 用途 | 重要性 |
+|------|------|------|---------|
+| **Vue 3** | 3.5.13 | 前端框架 | ⭐⭐⭐⭐⭐ |
+| **TypeScript** | 5.6.3 | 类型系统 | ⭐⭐⭐⭐⭐ |
+| **Vite** | 6.0.0 | 构建工具 | ⭐⭐⭐⭐⭐ |
+| **pnpm** | 10.14.0 | 包管理器 | ⭐⭐⭐⭐⭐ |
+
+### 🎨 UI 组件库
+| 组件库 | 用途 | 使用场景 |
+|--------|------|----------|
+| **Ant Design Vue** | 主要UI组件库 | 表单、表格、导航等 |
+| **PrimeVue** | 企业级组件 | 复杂业务组件 |
+| **Tailwind CSS** | 样式框架 | 快速样式开发 |
+| **UnoCSS** | 原子化CSS | 性能优化 |
+
+### 📊 数据处理
+| 工具 | 用途 |
+|------|------|
+| **Pinia** | 状态管理 |
+| **VXE Table** | 高性能表格 |
+| **ECharts** | 数据可视化 |
+| **VeeValidate + Zod** | 表单验证 |
+
+### 🔧 开发工具
+| 工具 | 配置文件 | 用途 |
+|------|-----------|------|
+| **ESLint** | `eslint.config.mjs` | 代码检查 |
+| **Prettier** | `@vben/prettier-config` | 代码格式化 |
+| **Vitest** | - | 单元测试 |
+| **Playwright** | - | E2E测试 |
+
+---
+
+## 🚀 快速启动指南
+
+### 环境要求
+```bash
+Node.js >= 20.10.0
+pnpm >= 9.12.0 (必须使用pnpm，不支持npm/yarn)
+```
+
+### 安装依赖
+```bash
+# 安装所有依赖
+pnpm install
+
+# 重新安装依赖（清理模式）
+pnpm reinstall
+```
+
+### 开发服务器
+```bash
+# 启动中央管理后台
+pnpm dev:mpurse-central
+
+# 启动商户端应用
+pnpm dev:mpurse-merchant
+
+# 同时启动所有应用
+pnpm dev
+```
+
+### 构建项目
+```bash
+# 开发环境构建
+pnpm build
+
+# UAT环境构建
+pnpm build:uat
+
+# 生产环境构建
+pnpm build:prod
+```
+
+---
+
+## 📁 目录结构详解
+
+### 中央管理后台 (mpurse-central)
+```
+src/
+├── views/                    # 页面组件
+│   ├── home/                # 首页相关
+│   ├── merchant/            # 商户管理
+│   ├── reports/             # 报表中心
+│   ├── settings/            # 系统设置
+│   └── _core/              # 核心页面（登录、错误等）
+├── components/              # 应用级组件
+├── router/                 # 路由配置
+├── store/                  # 状态管理
+├── utils/                  # 工具函数
+├── constants/              # 常量定义
+└── request/               # API请求
+```
+
+### 商户端应用 (mpurse-merchant)
+```
+src/
+├── views/
+│   ├── common/             # 通用功能
+│   ├── products/           # 产品管理
+│   ├── reports/            # 报表查询
+│   └── transaction/        # 交易管理
+├── request/                # 包含加密解密功能
+└── ...（其他结构同central）
+```
+
+---
+
+## 🔒 开发规范（必须遵循）
+
+### Vue 组件开发规范
+```vue
+<template>
+  <!-- 使用语义化标签 -->
+  <div class="page-container">
+    <h1>页面标题</h1>
+  </div>
+</template>
+
+<script setup lang="ts">
+/**
+ * @fileoverview 组件功能描述
+ * @author AI开发者
+ * @date 2024-08-24
+ */
+
+// 必须使用 <script setup> 语法
+import { ref, onMounted } from 'vue'
+import type { ComponentProps } from './types'
+
+/**
+ * 组件属性定义
+ */
+interface Props {
+  /** 页面标题 */
+  title: string
+  /** 是否显示 */
+  visible?: boolean
+}
+
+/**
+ * 定义组件属性
+ */
+const props = withDefaults(defineProps<Props>(), {
+  visible: true
+})
+
+/**
+ * 响应式数据
+ */
+const loading = ref(false)
+
+/**
+ * 初始化数据加载
+ */
+const initData = async () => {
+  loading.value = true
+  try {
+    // 业务逻辑
+  } catch (error) {
+    console.error('数据加载失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+/**
+ * 组件挂载时执行
+ */
+onMounted(() => {
+  initData()
+})
+</script>
+
+<style scoped>
+/* 优先使用 Tailwind CSS 类 */
+.page-container {
+  @apply p-4 bg-white rounded-lg;
+}
+</style>
+```
+
+### TypeScript 规范
+```typescript
+/**
+ * @fileoverview API接口类型定义
+ */
+
+/**
+ * 用户信息接口
+ */
+export interface UserInfo {
+  /** 用户ID */
+  id: number
+  /** 用户名 */
+  username: string
+  /** 邮箱地址 */
+  email: string
+  /** 创建时间 */
+  createdAt: string
+}
+
+/**
+ * API响应结构
+ */
+export interface ApiResponse<T = any> {
+  /** 响应码 */
+  code: number
+  /** 响应消息 */
+  message: string
+  /** 响应数据 */
+  data: T
+  /** 是否成功 */
+  success: boolean
+}
+
+/**
+ * 分页查询参数
+ */
+export interface PageParams {
+  /** 当前页码 */
+  page: number
+  /** 每页大小 */
+  size: number
+}
+```
+
+### API 请求规范
+```typescript
+/**
+ * @fileoverview 用户相关API
+ */
+
+import { request } from '@shared/request'
+import type { UserInfo, ApiResponse, PageParams } from './types'
+
+/**
+ * 获取用户列表
+ * @param params 查询参数
+ * @returns 用户列表响应
+ */
+export const getUserList = (params: PageParams) => {
+  return request.get<ApiResponse<UserInfo[]>>('/api/users', { params })
+}
+
+/**
+ * 创建用户
+ * @param data 用户数据
+ * @returns 创建结果
+ */
+export const createUser = (data: Omit<UserInfo, 'id' | 'createdAt'>) => {
+  return request.post<ApiResponse<UserInfo>>('/api/users', data)
+}
+```
+
+---
+
+## 🎨 样式开发规范
+
+### Tailwind CSS 使用规范
+```vue
+<template>
+  <!-- 推荐：使用 Tailwind 原子类 -->
+  <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold text-gray-800">标题</h1>
+    <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+      按钮
+    </button>
+  </div>
+</template>
+
+<style scoped>
+/* 复杂样式使用 @apply */
+.custom-button {
+  @apply px-4 py-2 bg-blue-500 text-white rounded;
+  @apply hover:bg-blue-600 focus:ring-2 focus:ring-blue-300;
+}
+
+/* 特殊情况下使用 CSS 变量 */
+.theme-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+</style>
+```
+
+### 响应式设计
+```vue
+<template>
+  <div class="container mx-auto px-4">
+    <!-- 响应式网格 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="card">内容</div>
+    </div>
+
+    <!-- 响应式文本 -->
+    <h1 class="text-xl md:text-2xl lg:text-3xl font-bold">
+      响应式标题
+    </h1>
+  </div>
+</template>
+```
+
+---
+
+## 🔐 状态管理规范
+
+### Pinia Store 规范
+```typescript
+/**
+ * @fileoverview 用户状态管理
+ */
+
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import type { UserInfo } from '@/types'
+
+/**
+ * 用户状态管理
+ */
+export const useUserStore = defineStore('user', () => {
+  /**
+   * 用户信息
+   */
+  const userInfo = ref<UserInfo | null>(null)
+
+  /**
+   * 加载状态
+   */
+  const loading = ref(false)
+
+  /**
+   * 计算属性：是否已登录
+   */
+  const isLoggedIn = computed(() => !!userInfo.value)
+
+  /**
+   * 计算属性：用户权限
+   */
+  const permissions = computed(() => userInfo.value?.permissions || [])
+
+  /**
+   * 登录操作
+   * @param credentials 登录凭据
+   */
+  const login = async (credentials: LoginCredentials) => {
+    loading.value = true
+    try {
+      const { data } = await loginApi(credentials)
+      userInfo.value = data
+      return { success: true }
+    } catch (error) {
+      console.error('登录失败:', error)
+      return { success: false, error }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * 登出操作
+   */
+  const logout = () => {
+    userInfo.value = null
+  }
+
+  return {
+    // 状态
+    userInfo,
+    loading,
+    // 计算属性
+    isLoggedIn,
+    permissions,
+    // 操作
+    login,
+    logout
+  }
+}, {
+  // 持久化配置
+  persist: {
+    key: 'user-store',
+    paths: ['userInfo']
+  }
+})
+```
+
+---
+
+## 🧪 测试规范
+
+### 单元测试规范
+```typescript
+/**
+ * @fileoverview 用户工具函数测试
+ */
+
+import { describe, it, expect } from 'vitest'
+import { formatUserName, validateEmail } from '@/utils/user'
+
+describe('用户工具函数测试', () => {
+  describe('formatUserName', () => {
+    it('应该正确格式化用户名', () => {
+      expect(formatUserName('john', 'doe')).toBe('John Doe')
+    })
+
+    it('应该处理空值情况', () => {
+      expect(formatUserName('', '')).toBe('')
+    })
+  })
+
+  describe('validateEmail', () => {
+    it('应该验证有效邮箱', () => {
+      expect(validateEmail('test@example.com')).toBe(true)
+    })
+
+    it('应该拒绝无效邮箱', () => {
+      expect(validateEmail('invalid-email')).toBe(false)
+    })
+  })
+})
+```
+
+### 组件测试规范
+```typescript
+/**
+ * @fileoverview 用户卡片组件测试
+ */
+
+import { mount } from '@vue/test-utils'
+import { describe, it, expect } from 'vitest'
+import UserCard from '@/components/UserCard.vue'
+
+describe('UserCard 组件测试', () => {
+  it('应该正确渲染用户信息', () => {
+    const wrapper = mount(UserCard, {
+      props: {
+        user: {
+          id: 1,
+          name: 'Test User',
+          email: 'test@example.com'
+        }
+      }
+    })
+
+    expect(wrapper.find('[data-testid="user-name"]').text()).toBe('Test User')
+    expect(wrapper.find('[data-testid="user-email"]').text()).toBe('test@example.com')
+  })
+
+  it('应该响应点击事件', async () => {
+    const wrapper = mount(UserCard, {
+      props: {
+        user: { id: 1, name: 'Test', email: 'test@example.com' }
+      }
+    })
+
+    await wrapper.find('[data-testid="user-card"]').trigger('click')
+    expect(wrapper.emitted('click')).toBeTruthy()
+  })
+})
+```
+
+---
+
+## 🐛 调试指南
+
+### 开发工具配置
+```json
+// .vscode/settings.json
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "typescript.preferences.importModuleSpecifier": "relative"
+}
+```
+
+### 常见错误排查
+
+#### 1. 依赖安装问题
+```bash
+# 清理依赖
+pnpm clean --del-lock
+pnpm install
+
+# 检查依赖冲突
+pnpm why <package-name>
+```
+
+#### 2. TypeScript 类型错误
+```bash
+# 类型检查
+pnpm typecheck
+
+# 查看具体错误
+npx vue-tsc --noEmit
+```
+
+#### 3. 构建错误
+```bash
+# 详细构建信息
+pnpm build --verbose
+
+# 分析构建产物
+npx vite-bundle-analyzer dist
+```
+
+#### 4. 运行时错误调试
+```typescript
+// 在组件中添加错误边界
+import { onErrorCaptured } from 'vue'
+
+onErrorCaptured((error, instance, info) => {
+  console.error('组件错误:', {
+    error,
+    component: instance?.type.name,
+    info
+  })
+  return false
+})
+```
+
+---
+
+## 🔧 开发工具命令
+
+### 代码质量检查
+```bash
+# ESLint 检查
+pnpm lint
+
+# 格式化代码
+pnpm format
+
+# 类型检查
+pnpm typecheck
+```
+
+### 测试命令
+```bash
+# 单元测试
+pnpm test:unit
+
+# E2E测试
+pnpm test:e2e
+
+# 测试覆盖率
+pnpm test:coverage
+```
+
+### 构建和部署
+```bash
+# 各环境构建
+pnpm build:qa
+pnpm build:uat
+pnpm build:prod
+
+# 预览构建结果
+pnpm preview
+```
+
+---
+
+## 🌍 环境配置
+
+### 环境变量配置
+```bash
+# .env.development
+VITE_API_BASE_URL=http://localhost:3000
+VITE_APP_TITLE=MPurse 开发环境
+
+# .env.uat
+VITE_API_BASE_URL=https://uat-api.mpurse.com
+VITE_APP_TITLE=MPurse UAT环境
+
+# .env.production
+VITE_API_BASE_URL=https://api.mpurse.com
+VITE_APP_TITLE=MPurse 生产环境
+```
+
+### Vite 配置说明
+```typescript
+// vite.config.mts
+import { defineConfig } from 'vite'
+import { setupViteConfig } from '@vben/vite-config'
+
+export default defineConfig(async ({ mode }) => {
+  return setupViteConfig({
+    vbenConfig: {
+      target: 'chrome90',
+      port: 5566, // mpurse-central 端口
+      isMock: false
+    }
+  })
+})
+```
+
+---
+
+## 📚 业务逻辑说明
+
+### 支付流程核心逻辑
+```typescript
+/**
+ * 支付处理流程
+ */
+export class PaymentProcessor {
+  /**
+   * 处理支付请求
+   * @param paymentData 支付数据
+   */
+  async processPayment(paymentData: PaymentRequest): Promise<PaymentResult> {
+    // 1. 数据验证
+    await this.validatePaymentData(paymentData)
+
+    // 2. 风控检查
+    await this.riskAssessment(paymentData)
+
+    // 3. 调用支付网关
+    const gatewayResult = await this.callPaymentGateway(paymentData)
+
+    // 4. 更新订单状态
+    await this.updateOrderStatus(paymentData.orderId, gatewayResult.status)
+
+    // 5. 发送通知
+    await this.sendNotification(paymentData, gatewayResult)
+
+    return gatewayResult
+  }
+}
+```
+
+### 权限控制逻辑
+```typescript
+/**
+ * 权限验证组合函数
+ */
+export const usePermission = () => {
+  const userStore = useUserStore()
+
+  /**
+   * 检查是否有指定权限
+   * @param permission 权限代码
+   */
+  const hasPermission = (permission: string): boolean => {
+    return userStore.permissions.includes(permission)
+  }
+
+  /**
+   * 检查是否有任一权限
+   * @param permissions 权限数组
+   */
+  const hasAnyPermission = (permissions: string[]): boolean => {
+    return permissions.some(permission => hasPermission(permission))
+  }
+
+  return {
+    hasPermission,
+    hasAnyPermission
+  }
+}
+```
+
+---
+
+## ⚠️ 重要注意事项
+
+### 🚫 禁止事项
+- ❌ **禁止使用 npm 或 yarn**，必须使用 pnpm
+- ❌ **禁止修改已验证正确的功能逻辑**
+- ❌ **禁止删除有用的注释**
+- ❌ **禁止忽略 TypeScript 类型错误**
+- ❌ **禁止直接修改 node_modules**
+
+### ✅ 必须事项
+- ✅ **所有函数必须有 JSDoc 注释**
+- ✅ **使用 `<script setup>` 语法**
+- ✅ **优先使用 @shared/* 共享模块**
+- ✅ **遵循现有代码风格**
+- ✅ **确保类型安全**
+
+### 🔒 安全要求
+- 🔐 **API 接口使用加密传输**
+- 🔐 **敏感信息不得暴露在日志中**
+- 🔐 **用户输入必须验证和转义**
+- 🔐 **权限检查必须在前后端同时进行**
+
+---
+
+## 📞 获取帮助
+
+### 项目文档位置
+- 📄 `CLAUDE.md` - 项目开发指引
+- 📄 `CHANGELOG.md` - 修改记录
+- 📄 `README.md` - 项目说明
+
+### 调试技巧
+1. **启动卡住**: 检查端口占用，查看控制台错误
+2. **依赖冲突**: 使用 `pnpm why <package>` 分析
+3. **类型错误**: 运行 `pnpm typecheck` 查看详情
+4. **构建失败**: 检查环境变量配置
+
+### 联系方式
+如有技术问题，请：
+1. 查看项目文档
+2. 检查 CHANGELOG.md
+3. 运行相应的调试命令
+4. 查看控制台错误信息
+
+---
+
+
+**🎯 记住：代码质量 > 开发速度，安全性 > 便利性**
+
+确保每次提交都经过充分测试，保证项目100%正确交付！

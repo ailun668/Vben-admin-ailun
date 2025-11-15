@@ -1,0 +1,27 @@
+[
+  {
+    "content": "深入理解docs目录下的所有文档资料",
+    "status": "in_progress",
+    "activeForm": "正在深入理解docs目录下的所有文档资料"
+  },
+  {
+    "content": "分析现有文档的结构和内容",
+    "status": "pending",
+    "activeForm": "分析现有文档的结构和内容"
+  },
+  {
+    "content": "重新整理和分类技术栈文档",
+    "status": "pending",
+    "activeForm": "重新整理和分类技术栈文档"
+  },
+  {
+    "content": "删除不存在的文件链接，优化文档结构",
+    "status": "pending",
+    "activeForm": "删除不存在的文件链接，优化文档结构"
+  },
+  {
+    "content": "确保文档便于AI开发工程师快速上手项目",
+    "status": "pending",
+    "activeForm": "确保文档便于AI开发工程师快速上手项目"
+  }
+]

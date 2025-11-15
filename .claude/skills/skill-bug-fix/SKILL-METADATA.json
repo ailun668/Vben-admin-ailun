@@ -1,0 +1,220 @@
+{
+  "name": "claude-bug-fix",
+  "displayName": "Claude 自动修复 Bug",
+  "version": "2.0",
+  "description": "使用 Claude AI 自动分析和修复代码 Bug 的完整指南。包含 fix_bug_with_codex 工具使用、Bug 描述标准、Claude 工作流程、修复报告结构、最佳实践和真实案例。",
+  "author": "Claude AI Development Team",
+  "license": "MIT",
+  "releaseDate": "2025-11-13",
+  "keywords": [
+    "bug-fix",
+    "code-analysis",
+    "claude-ai",
+    "debugging",
+    "automated-repair",
+    "code-quality",
+    "software-engineering"
+  ],
+  "category": "code-quality",
+  "subcategories": [
+    "bug-fixing",
+    "code-analysis",
+    "debugging",
+    "best-practices"
+  ],
+  "compatibility": {
+    "minClaudeVersion": "3.5",
+    "supportedPlatforms": [
+      "claude-code",
+      "claude-api",
+      "cursor-ide",
+      "windsurf-ide"
+    ]
+  },
+  "features": [
+    {
+      "title": "Fix_Bug_With_Codex 工具",
+      "description": "完整的 CLI 工具使用指南，包含命令选项、配置文件和使用示例"
+    },
+    {
+      "title": "Bug 描述标准化",
+      "description": "10 个必需要素，确保 Bug 描述完整且易于分析"
+    },
+    {
+      "title": "Claude 7 阶段工作流",
+      "description": "从问题分析到修复报告的完整端到端工作流程"
+    },
+    {
+      "title": "修复报告模板",
+      "description": "专业的结构化修复报告模板，包含所有必要章节"
+    },
+    {
+      "title": "最佳实践",
+      "description": "10 个经验总结 + 10 个常见陷阱的全面指导"
+    },
+    {
+      "title": "实战示例",
+      "description": "3 个真实场景的完整修复示例（Python、JavaScript、SQL）"
+    }
+  ],
+  "contents": {
+    "main": "SKILL.md",
+    "quickReference": "QUICK-REFERENCE.md",
+    "usageGuide": "USAGE-GUIDE.md",
+    "metadata": "SKILL-METADATA.json"
+  },
+  "readingTime": {
+    "quick": "15 分钟（快速参考）",
+    "complete": "45-60 分钟（完整学习）",
+    "practical": "30 分钟（实战应用）"
+  },
+  "sections": [
+    {
+      "id": "overview",
+      "title": "技能概述",
+      "content": "介绍技能的核心功能和应用场景"
+    },
+    {
+      "id": "fix-bug-tool",
+      "title": "Fix_Bug_With_Codex 工具",
+      "content": "工具使用方法、命令选项、配置文件示例"
+    },
+    {
+      "id": "bug-elements",
+      "title": "Bug 描述的 10 个必需要素",
+      "content": "标准化 Bug 描述，提供完整的要素清单和示例"
+    },
+    {
+      "id": "claude-workflow",
+      "title": "Claude 工作流程",
+      "content": "7 阶段工作流：分析 → 定位 → RCA → 设计 → 实现 → 测试 → 报告"
+    },
+    {
+      "id": "report-structure",
+      "title": "修复报告的结构",
+      "content": "专业报告模板，包含摘要、分析、方案、实现、测试、部署指导"
+    },
+    {
+      "id": "best-practices",
+      "title": "最佳实践和注意事项",
+      "content": "10 个最佳实践 + 10 个常见陷阱的完整指南"
+    },
+    {
+      "id": "examples",
+      "title": "示例用法",
+      "content": "3 个真实场景的完整修复示例"
+    },
+    {
+      "id": "resources",
+      "title": "相关资源",
+      "content": "官方文档、学习资源、社区支持"
+    }
+  ],
+  "useCases": [
+    {
+      "title": "自动化 Bug 修复",
+      "description": "使用 Claude 自动分析和修复代码中的 Bug",
+      "difficulty": "初级"
+    },
+    {
+      "title": "深入代码分析",
+      "description": "通过结构化的方法深入理解代码问题的根本原因",
+      "difficulty": "中级"
+    },
+    {
+      "title": "生成专业修复报告",
+      "description": "生成结构化的修复报告，用于团队沟通和文档记录",
+      "difficulty": "中级"
+    },
+    {
+      "title": "建立修复流程规范",
+      "description": "在团队中建立标准化的 Bug 修复流程和文档标准",
+      "difficulty": "高级"
+    }
+  ],
+  "statistics": {
+    "totalSections": 8,
+    "totalCodeExamples": 12,
+    "totalPractices": 20,
+    "totalRealWorldExamples": 3,
+    "estimatedReadingHours": 1,
+    "estimatedPracticeHours": 2
+  },
+  "tags": {
+    "technical": [
+      "Python",
+      "JavaScript",
+      "SQL",
+      "debugging",
+      "bug-fixing",
+      "code-analysis"
+    ],
+    "domain": [
+      "software-engineering",
+      "quality-assurance",
+      "development",
+      "maintenance"
+    ],
+    "skill-level": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ]
+  },
+  "relatedSkills": [
+    {
+      "name": "code-review",
+      "description": "代码审查最佳实践"
+    },
+    {
+      "name": "testing-strategies",
+      "description": "软件测试策略"
+    },
+    {
+      "name": "debugging-techniques",
+      "description": "调试技巧和工具"
+    }
+  ],
+  "changelog": [
+    {
+      "version": "2.0",
+      "date": "2025-11-13",
+      "changes": [
+        "完整重写和优化所有章节",
+        "添加 fix_bug_with_codex 工具完整指南",
+        "定义 Bug 描述的 10 个必需要素",
+        "创建 7 阶段 Claude 工作流程",
+        "添加专业修复报告模板",
+        "扩展最佳实践为 10 个 + 10 个陷阱",
+        "添加 3 个实战示例",
+        "创建快速参考和使用指南"
+      ],
+      "status": "stable"
+    },
+    {
+      "version": "1.0",
+      "date": "2025-11-10",
+      "changes": [
+        "初始版本"
+      ],
+      "status": "deprecated"
+    }
+  ],
+  "maintenance": {
+    "maintainer": "Claude AI Development Team",
+    "lastUpdated": "2025-11-13",
+    "updateFrequency": "月度审查",
+    "issueTracker": "https://github.com/sanshao85/persistent-terminal-mcp/issues",
+    "repository": "https://github.com/sanshao85/persistent-terminal-mcp"
+  },
+  "feedback": {
+    "reportIssues": "在 GitHub 仓库中报告问题",
+    "suggestImprovement": "提交改进建议和反馈",
+    "shareExamples": "分享您的修复案例和经验"
+  },
+  "certification": {
+    "requiresTraining": false,
+    "hasAssessment": false,
+    "estimatedLearningTime": "2-3 小时"
+  }
+}

@@ -53,7 +53,8 @@
       <a-col :xs="24" :lg="12">
         <a-card title="最近访问" :bordered="false">
           <a-list
-            data-source="data"
+            v-if="recentVisits.length > 0"
+            :data-source="recentVisits"
             size="small"
             :split="false"
           >
@@ -66,7 +67,7 @@
               </a-list-item>
             </template>
           </a-list>
-          <a-empty style="margin-top: 20px" />
+          <a-empty v-else style="margin-top: 20px" description="暂无访问记录" />
         </a-card>
       </a-col>
       <a-col :xs="24" :lg="12">
@@ -95,12 +96,21 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import {
   UserOutlined,
   EyeOutlined,
   ShopOutlined,
   LineChartOutlined
 } from '@ant-design/icons-vue'
+
+// 最近访问记录
+const recentVisits = ref([
+  { title: '仪表盘概览', time: '今天 10:30' },
+  { title: '用户管理 - 编辑用户', time: '今天 09:15' },
+  { title: '角色管理 - 新增角色', time: '昨天 14:22' },
+  { title: '权限管理', time: '昨天 11:45' }
+])
 </script>
 
 <style scoped>

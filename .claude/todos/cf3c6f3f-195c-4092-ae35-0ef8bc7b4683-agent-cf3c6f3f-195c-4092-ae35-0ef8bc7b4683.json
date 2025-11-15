@@ -1,0 +1,22 @@
+[
+  {
+    "content": "分析代码库结构和配置文件",
+    "status": "completed",
+    "activeForm": "正在分析代码库结构和配置文件"
+  },
+  {
+    "content": "查看项目配置和构建脚本",
+    "status": "completed",
+    "activeForm": "正在查看项目配置和构建脚本"
+  },
+  {
+    "content": "了解架构和技术栈",
+    "status": "completed",
+    "activeForm": "正在了解架构和技术栈"
+  },
+  {
+    "content": "创建 CLAUDE.md 文件",
+    "status": "in_progress",
+    "activeForm": "正在创建 CLAUDE.md 文件"
+  }
+]

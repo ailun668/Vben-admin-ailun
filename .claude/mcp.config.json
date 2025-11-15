@@ -1,0 +1,12 @@
+{
+  "defaultServers": ["context7", "serena"],
+  "context7": {
+			"command": "npx",
+			"args": ["-y", "--node-options=--experimental-vm-modules", "@upstash/context7-mcp@1.0.6"]
+		},
+
+		"serena": {
+			"command": "uv",
+			"args": ["run", "--directory", "D:/Project/serena", "serena-mcp-server"]
+		}
+}
