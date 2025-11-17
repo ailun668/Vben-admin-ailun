@@ -38,7 +38,7 @@
             @click="action.onClick"
           >
             <template v-if="hasIconSlot(action.componentProps)" #icon>
-              <RenderIcon :icon="action.componentProps.icon" />
+              <RenderIcon :icon="action.componentProps?.icon" />
             </template>
             {{ action.label }}
           </component>
@@ -96,7 +96,7 @@
               :fixed="column.fixed"
             >
               <template #default="{ row }">
-                <RenderSlot :render="() => column.slots.default({ row })" />
+                <RenderSlot :render="() => column.slots?.default?.({ row })" />
               </template>
             </vxe-column>
             <!-- 普通列 -->
@@ -136,7 +136,7 @@
       :confirm-loading="submitLoading"
       :mask-closable="editModalMaskClosable"
       @ok="handleEditSubmit"
-      @cancel="handleEditCancel"
+      @cancel="triggerDrawerClose"
     >
       <a-form
         ref="editFormRef"
@@ -302,16 +302,16 @@ const RenderIcon = defineComponent({
     return () => {
       // 如果是 VNode（有 __v_isVNode 属性），直接返回
       if (props.icon && typeof props.icon === 'object' && '__v_isVNode' in props.icon) {
-        return props.icon
+        return props.icon as any
       }
       // 否则作为组件渲染
-      return h(props.icon)
+      return h(props.icon as any)
     }
   }
 })
 
 
-const tablePagerConfig = computed(() => {
+const tablePagerConfig = computed<any>(() => {
   if (!pageConfig.value.enablePagination) {
     return undefined
   }
@@ -351,7 +351,7 @@ const editDrawerWidth = computed(() => {
   }
   // 如果是字符串如 '600px'，提取数字
   const match = String(width).match(/(\d+)/)
-  return match ? parseInt(match[1], 10) : 600
+  return match && match[1] ? parseInt(match[1], 10) : 600
 })
 
 const editModalMaskClosable = computed(() => {

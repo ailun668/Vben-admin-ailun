@@ -16,7 +16,7 @@
           <a-dropdown :trigger="['contextmenu']">
             <span>{{ tab.title }}</span>
             <template #overlay>
-              <a-menu @click="({ key }) => handleMenuClick(key, tab.path)">
+              <a-menu @click="({ key }: { key: string }) => handleMenuClick(key, tab.path)">
                 <a-menu-item key="reload">重新加载</a-menu-item>
                 <a-menu-item key="close">关闭</a-menu-item>
                 <a-menu-divider />

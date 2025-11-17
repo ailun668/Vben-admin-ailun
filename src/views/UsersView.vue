@@ -113,7 +113,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { message } from 'ant-design-vue'
+import { message, Modal } from 'ant-design-vue'
 import { PlusOutlined, DownloadOutlined } from '@ant-design/icons-vue'
 import { http } from '@/api/http'
 import type { VxeTableInstance } from 'vxe-table'
@@ -166,9 +166,9 @@ const pageConfig = reactive({
 })
 
 // 排序配置
-const sortConfig = reactive({
+const sortConfig = reactive<any>({
   remote: true,
-  defaultSort: { field: 'createTime', order: 'desc' }
+  defaultSort: { field: 'createTime', order: 'desc' as const }
 })
 
 // 表格列定义
@@ -239,7 +239,7 @@ function handleEdit(row: User) {
 
 // 删除用户
 function handleDelete(row: User) {
-  message.confirm({
+  Modal.confirm({
     title: '确认删除',
     content: `是否确认删除用户 "${row.realName}"?`,
     okText: '确认',

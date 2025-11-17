@@ -65,9 +65,11 @@ export interface GridColumn {
   sortable?: boolean
   /** 溢出显示方式 */
   showOverflow?: boolean | 'tooltip' | 'ellipsis'
+  /** 列固定位置 */
+  fixed?: 'left' | 'right'
   /** 自定义插槽 */
   slots?: {
-    default?: string
+    default?: (options: { row: any }) => any
     header?: string
   }
   /** 操作按钮配置 */

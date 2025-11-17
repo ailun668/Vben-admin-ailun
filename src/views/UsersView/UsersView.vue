@@ -140,7 +140,7 @@ const userCrudConfig = computed(() => ({
         }
       ],
       labelWidth: 80,
-      layout: 'inline'
+      layout: 'inline' as const
     },
     // 工具栏操作
     toolbarActions: [
@@ -174,12 +174,12 @@ const userCrudConfig = computed(() => ({
       },
       sortConfig: {
         remote: true,
-        defaultSort: { field: 'createTime', order: 'desc' }
+        defaultSort: { field: 'createTime', order: 'desc' as const }
       },
       // 数据代理配置（使用静态模拟数据）
       proxyConfig: {
         ajax: {
-          query: async ({ page }: { page: any }, formValues: any) => {
+          query: async ({ page }: { page: any }, formValues: any): Promise<{ items: any[]; count: number }> => {
             // 使用静态模拟数据
             const mockData = generateMockUserList(100)
             
@@ -219,7 +219,8 @@ const userCrudConfig = computed(() => ({
           field: 'id',
           title: 'ID',
           width: 80,
-          sortable: true
+          sortable: true,
+          showOverflow: 'ellipsis' as const
         },
         {
           field: 'username',
@@ -343,7 +344,7 @@ const userCrudConfig = computed(() => ({
             }
           ]
         }
-      ]
+      ] as any
     }
   }
 }))

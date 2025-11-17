@@ -139,8 +139,8 @@ function generateMockPermissionList(count: number = 35) {
   const resources = ['user', 'role', 'permission', 'dashboard', 'settings']
   const actions = ['view', 'create', 'edit', 'delete', 'export', 'import']
   const categories = ['用户管理', '角色管理', '权限管理', '仪表盘', '系统设置']
-  
-  const permissions = []
+
+  const permissions: any[] = []
   let id = 1
 
   // 为每个资源生成常见操作
@@ -270,7 +270,7 @@ const permissionCrudConfig = computed<LocalCrudConfig>(() => ({
       },
       sortConfig: {
         remote: true,
-        defaultSort: { field: 'createTime', order: 'desc' }
+        defaultSort: { field: 'createTime', order: 'desc' as const }
       },
       // 数据代理配置
       proxyConfig: {

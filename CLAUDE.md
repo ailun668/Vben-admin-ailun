@@ -203,35 +203,112 @@ if (userStore.hasPermission('system:user:delete')) {
 - [ ] Implement breadcrumb navigation
 - [ ] Add internationalization (i18n) support
 
+## Code Standards
+
+All code in this project must follow the standards defined in `.cursor/rules/AI 辅助编程的核心编码规范.mdc`. Key principles:
+
+### TypeScript & Code Quality
+- **Strict types**: No `any`. Always define proper interfaces/types.
+- **Equality**: Use `===` and `!==`, never `==` or `!=`
+- **Variables**: Use `const`/`let`, never `var`
+- **Nesting**: Max 3 levels deep, use early returns to reduce nesting
+- **Functions**: Prefer arrow functions and destructured object parameters for 3+ params
+
+### Vue 3 Component Structure (Fixed Order)
+```vue
+<script setup lang="ts">
+// 1. Imports (dependencies, types)
+// 2. Props (with withDefaults)
+// 3. Emits
+// 4. Reactive state (ref, reactive)
+// 5. Computed properties
+// 6. Methods
+// 7. Lifecycle hooks
+</script>
+
+<template>
+  <!-- Template -->
+</template>
+
+<style scoped>
+/* Scoped styles only */
+</style>
+```
+
+### Important Patterns
+- Use `@/` path alias for imports (maps to `src/`)
+- Use `optional chaining` (`user?.profile?.name`) and `nullish coalescing` (`value ?? default`)
+- Lazy load routes: `component: () => import('@/views/...')`
+- Always use `:key="item.id"` in `v-for` loops
+- Use `v-if` for conditional rendering, `v-show` for frequent toggles
+
+### Error Handling
+- Wrap async operations in try/catch
+- Always handle HTTP errors (not just happy path)
+- Log errors for debugging but avoid logging sensitive info
+
+### Security
+- Never use `v-html` with user input
+- Always use environment variables for API keys: `import.meta.env.VITE_*`
+- Validate user input before processing
+- Sanitize data before display
+
 ## Important Files & Their Purpose
 
 | File | Purpose |
 |------|---------|
 | `router/index.ts` | **Core auth logic** - route guards, permission checking, dynamic route registration |
-| `store/modules/user.ts` | **Auth state** - token, user info, login/logout/getCurrentUser actions |
+| `store/modules/user.ts` | **Auth state** - token, user info, login/logout actions |
 | `store/modules/permission.ts` | **Route filtering** - generates accessible routes based on user roles |
-| `api/http.ts` | **API setup** - Axios instance with auth token injection and error handling |
+| `api/http.ts` | **API client** - Axios instance with auth token injection and error handling |
 | `src/mock/user.ts` | **Mock backend** - all API endpoints for development |
-| `App.vue` | **Layout** - dynamic menu rendering based on accessible routes |
+| `App.vue` | **Layout** - dynamic menu rendering, theme toggle, user menu |
 | `vite.config.ts` | **Build config** - vite-plugin-mock setup, path aliases |
+
+## Git Workflow
+
+**Current branch**: `feature/optimize-header-user-info` (optimization of header and user info components)
+
+### Branch Strategy
+- `master` - stable production-ready code
+- `feature/*` - feature development branches
+- Create PRs before merging to master
+
+### Before Committing
+```bash
+# 1. Type check
+vue-tsc -b
+
+# 2. Fix type errors if any
+# (TypeScript errors will prevent the build)
+
+# 3. Commit with descriptive message
+git add .
+git commit -m "feat: description of changes"
+```
 
 ## Debugging Tips
 
 ### Check Auth State
-Open browser DevTools → Application → Local Storage → `user_store` to see persisted token/userInfo
+Open browser DevTools → Application → Local Storage → look for `user_store` to see persisted token/userInfo
 
 ### Check Route Access
-In router/index.ts route guard, accessible routes are computed from `permissionStore.accessibleRoutes`
+Routes are filtered in `permissionStore.accessibleRoutes` based on user roles. Verify in the store that the current user has the correct roles.
 
 ### Mock API Issues
 If API calls fail, check:
 1. Network tab in DevTools - should show requests to `/api/*`
-2. Mock response format must match `ApiResponse<T>` type (code, data, message)
+2. Mock response format must match `{ code: 0, data: {...}, message: '...' }`
 3. Token validation in mock handlers compares `headers.authorization` with stored tokens
 
 ### Type Errors
-Run `vue-tsc -b` to catch TypeScript errors during development
+Run `vue-tsc -b` to catch TypeScript errors during development. The build will fail if there are type errors.
+
+### Component Issues
+- Check browser console for Vue warnings/errors
+- Verify props are passed correctly and match interface definitions
+- Ensure emitted events match the emit type definitions
 
 ---
 
-**Last Updated**: 2025-11-15
+**Last Updated**: 2025-11-17

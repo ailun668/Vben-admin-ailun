@@ -139,8 +139,8 @@ function generateMockRoleList(count: number = 25) {
   ]
 
   for (let i = 1; i <= count; i++) {
-    const roleName = roleNames[i % roleNames.length]
-    const permissions = permissionGroups[i % permissionGroups.length]
+    const roleName = roleNames[i % roleNames.length]!
+    const permissions = permissionGroups[i % permissionGroups.length]!
     roles.push({
       id: `${i}`,
       name: `${roleName.name}${i > roleNames.length ? ` ${Math.floor(i / roleNames.length)}` : ''}`,
@@ -225,7 +225,7 @@ const roleCrudConfig = computed<LocalCrudConfig>(() => ({
       },
       sortConfig: {
         remote: true,
-        defaultSort: { field: 'createTime', order: 'desc' }
+        defaultSort: { field: 'createTime', order: 'desc' as const }
       },
       // 数据代理配置
       proxyConfig: {
