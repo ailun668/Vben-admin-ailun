@@ -2,7 +2,6 @@
   <div class="users-view">
     <Crud ref="crudRef" :config="userCrudConfig" />
     <AddUserDrawer
-      v-if="addUserModalVisible"
       :open="addUserModalVisible"
       @cancel="addUserModalVisible = false"
       @success="handleAddUserSuccess"

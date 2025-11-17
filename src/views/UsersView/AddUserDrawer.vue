@@ -1,14 +1,11 @@
 <template>
   <a-drawer
-    v-if="props.open"
     :open="props.open"
     title="新增用户"
     :width="600"
     placement="right"
     :mask-closable="true"
-    :transition-name="false"
-    :class="{ 'drawer-closing-state': isClosing }"
-    @close="triggerClose"
+    @close="handleCancel"
   >
     <a-form
       ref="formRef"
@@ -61,7 +58,7 @@
     </a-form>
     <template #footer>
       <div style="text-align: right">
-        <a-button style="margin-right: 8px" @click="triggerClose">
+        <a-button style="margin-right: 8px" @click="handleCancel">
           取消
         </a-button>
         <a-button type="primary" :loading="loading" @click="handleOk">
@@ -69,7 +66,7 @@
         </a-button>
       </div>
     </template>
-    </a-drawer>
+  </a-drawer>
 </template>
 
 <script setup lang="ts">
@@ -89,7 +86,6 @@ const emit = defineEmits<{
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)
-const isClosing = ref(false)
 
 const formData = reactive({
   username: '',
@@ -149,9 +145,6 @@ async function handleOk() {
 
     message.success('用户创建成功')
     emit('success')
-
-    // 触发关闭动画而不是直接关闭
-    triggerClose()
   } catch (error: any) {
     if (error?.errorFields) {
       // 表单验证错误
@@ -164,53 +157,54 @@ async function handleOk() {
   }
 }
 
-/**
- * 触发Drawer关闭 - 实现延迟状态变化以支持关闭动画
- */
-function triggerClose() {
-  isClosing.value = true
-
-  // 等待关闭动画完成（0.3s）后再发送cancel事件（关闭Drawer）
-  setTimeout(() => {
-    isClosing.value = false
-    emit('cancel')
-  }, 300)
+function handleCancel() {
+  emit('cancel')
 }
 </script>
 
 <style scoped>
-/* ========== Drawer 关闭动画配置 ========== */
-/* Drawer的打开状态（默认状态）- 确保平滑打开动画 */
-:deep(.ant-drawer-mask) {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s !important;
-}
+/**
+ * 抽屉动画优化
+ * @description 确保打开和关闭动画效果一致，使用统一的过渡时间和缓动函数
+ */
 
-:deep(.ant-drawer-content-wrapper) {
-  transform: translateX(0) !important;
-  opacity: 1 !important;
+/* 抽屉容器动画 - 统一过渡效果 */
+:deep(.ant-drawer) {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Drawer的关闭状态 - drawer-closing-state类被添加到ant-drawer容器时生效 */
-:deep(.ant-drawer.drawer-closing-state) .ant-drawer-mask {
-  opacity: 0 !important;
-  visibility: hidden !important;
+/* 抽屉内容包裹层 - 关键：确保滑入滑出效果一致 */
+:deep(.ant-drawer-content-wrapper) {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-:deep(.ant-drawer.drawer-closing-state) .ant-drawer-content-wrapper {
-  transform: translateX(100%) !important;
-  opacity: 0 !important;
+/* 抽屉内容区域 */
+:deep(.ant-drawer-content) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* 关闭按钮悬停效果 */
+/* 抽屉头部 */
+:deep(.ant-drawer-header) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 抽屉主体 */
+:deep(.ant-drawer-body) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 关闭按钮动画 - 保持与其他元素一致的时间 */
 :deep(.ant-drawer-close) {
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 :deep(.ant-drawer-close:hover) {
-  transform: scale(1.15) !important;
+  transform: scale(1.1);
+}
+
+/* 遮罩层动画 - 确保淡入淡出效果一致 */
+:deep(.ant-drawer-mask) {
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 </style>
 

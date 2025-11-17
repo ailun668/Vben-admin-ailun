@@ -8,35 +8,30 @@ This is a **Vue 3 + TypeScript + Vite** admin dashboard application with:
 - Role-based access control (RBAC) system
 - Dynamic routing based on user permissions
 - Mock API backend using vite-plugin-mock
-- Ant Design Vue UI components
-- Pinia state management with persistence
-- Full TypeScript support
+- Ant Design Vue UI components (v4)
+- Pinia state management with localStorage persistence
+- Full TypeScript support with strict mode
 
-## Quick Start
+## Development Commands
 
-### Installation & Development
+**Preferred package manager**: `pnpm` (faster and more reliable than npm)
+
 ```bash
 # Install dependencies
-npm install
-# or
 pnpm install
 
-# Start development server
-npm run dev
-# or
+# Start development server (http://localhost:5173)
 pnpm dev
 
 # Build for production
-npm run build
+pnpm build
 
-# Type checking
+# Type checking (run before committing)
 vue-tsc -b
 
-# Preview production build
-npm run preview
+# Preview production build locally
+pnpm preview
 ```
-
-Development server runs at `http://localhost:5173`
 
 ### Test Credentials
 - **Admin**: username `admin`, password `admin123` (full access)

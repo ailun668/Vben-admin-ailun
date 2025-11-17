@@ -2,7 +2,6 @@
   <div class="permissions-view">
     <Crud ref="crudRef" :config="permissionCrudConfig" />
     <AddPermissionDrawer
-      v-if="addPermissionModalVisible"
       :open="addPermissionModalVisible"
       @cancel="addPermissionModalVisible = false"
       @success="handleAddPermissionSuccess"
