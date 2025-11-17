@@ -6,6 +6,26 @@
         <p>现代化企业管理系统</p>
       </div>
 
+      <!-- 快速登录选项 -->
+      <div class="quick-login-section">
+        <p class="quick-login-title">快速登录（本地）</p>
+        <div class="quick-login-buttons">
+          <a-button
+            v-for="user in quickLoginUsers"
+            :key="user.username"
+            type="primary"
+            :block="true"
+            size="large"
+            @click="quickLogin(user)"
+            class="quick-login-btn"
+          >
+            {{ user.realName }}
+          </a-button>
+        </div>
+      </div>
+
+      <a-divider>或使用账号密码登录</a-divider>
+
       <a-form
         :model="formState"
         :rules="rules"
@@ -40,30 +60,26 @@
 
         <a-form-item>
           <a-button
-            type="primary"
+            type="default"
             block
             size="large"
             html-type="submit"
             :loading="loading"
           >
-            {{ loading ? '登录中...' : '登录' }}
+            {{ loading ? '登录中...' : '调用后端 API 登录' }}
           </a-button>
         </a-form-item>
       </a-form>
 
       <div class="login-tips">
         <p>
-          <strong>测试账号:</strong>
+          <strong>💡 提示:</strong>
         </p>
         <ul>
-          <li>
-            <span class="label">管理员:</span>
-            <span class="value">admin / admin123</span>
-          </li>
-          <li>
-            <span class="label">普通用户:</span>
-            <span class="value">user / user123</span>
-          </li>
+          <li>点击上面的按钮可快速登录（不走接口）</li>
+          <li>或输入用户名密码通过后端 API 登录</li>
+          <li>管理员密码：admin123</li>
+          <li>普通用户密码：user123</li>
         </ul>
       </div>
     </div>
@@ -77,6 +93,7 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import { useUserStore } from '@/store/modules/user'
 import { usePermissionStore } from '@/store/modules/permission'
+import type { UserInfo } from '@/api/types'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -93,6 +110,71 @@ const rules = {
   password: [{ required: true, message: '请输入密码' }]
 }
 
+// 本地用户数据（不走接口的快速登录）
+const quickLoginUsers = ref<UserInfo[]>([
+  {
+    id: '1',
+    username: 'admin',
+    realName: '管理员',
+    email: 'admin@example.com',
+    avatar: 'https://avatars.githubusercontent.com/u/120364369?s=200&v=4',
+    roles: ['admin'],
+    permissions: [
+      'system:user:list',
+      'system:user:add',
+      'system:user:edit',
+      'system:user:delete',
+      'system:role:list',
+      'system:role:add',
+      'system:role:edit',
+      'system:role:delete',
+      'system:permission:list',
+      'system:permission:add',
+      'system:permission:edit',
+      'system:permission:delete'
+    ]
+  },
+  {
+    id: '2',
+    username: 'user',
+    realName: '普通用户',
+    email: 'user@example.com',
+    avatar: 'https://avatars.githubusercontent.com/u/120364369?s=200&v=4',
+    roles: ['user'],
+    permissions: [
+      'system:user:list',
+      'system:user:edit'
+    ]
+  }
+])
+
+/**
+ * 快速登录（本地，不走接口）
+ */
+function quickLogin(user: UserInfo) {
+  const token = `dev_mock_token_${user.username}`
+
+  // 直接设置用户信息和 token
+  userStore.setToken(token)
+  userStore.setUserInfo(user)
+
+  // 生成可访问的路由
+  permissionStore.generateRoutes(user.roles)
+
+  message.success(`已登录为 ${user.realName}`)
+
+  // 获取重定向路径
+  const redirect = (router.currentRoute.value.query.redirect as string) || '/'
+
+  // 跳转到目标页面
+  setTimeout(() => {
+    router.push(redirect)
+  }, 300)
+}
+
+/**
+ * 通过 API 登录
+ */
 async function onFinish() {
   loading.value = true
   try {
@@ -116,7 +198,7 @@ async function onFinish() {
       router.push(redirect)
     }, 500)
   } catch (error) {
-    message.error((error as any)?.message || '登录失败')
+    message.error((error as any)?.message || '登录失败，请检查后端服务是否启动')
   } finally {
     loading.value = false
   }
@@ -193,5 +275,34 @@ async function onFinish() {
 .login-tips .value {
   font-family: monospace;
   color: #333;
+}
+
+/* 快速登录样式 */
+.quick-login-section {
+  margin-bottom: 24px;
+}
+
+.quick-login-title {
+  text-align: center;
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.quick-login-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-login-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  font-weight: 500;
+}
+
+.quick-login-btn:hover {
+  opacity: 0.9;
 }
 </style>

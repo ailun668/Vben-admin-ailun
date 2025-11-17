@@ -124,6 +124,36 @@ router.beforeEach(
     const userStore = useUserStore()
     const permissionStore = usePermissionStore()
 
+    // ✨ 开发模式：检查是否跳过登录验证
+    const skipAuth = import.meta.env.VITE_SKIP_AUTH === 'true'
+    if (skipAuth && !userStore.token) {
+      // 使用默认的 admin 用户信息
+      const mockUser = {
+        id: '1',
+        username: 'admin',
+        realName: '管理员',
+        email: 'admin@example.com',
+        avatar: 'https://avatars.githubusercontent.com/u/120364369?s=200&v=4',
+        roles: ['admin'],
+        permissions: [
+          'system:user:list',
+          'system:user:add',
+          'system:user:edit',
+          'system:user:delete',
+          'system:role:list',
+          'system:role:add',
+          'system:role:edit',
+          'system:role:delete',
+          'system:permission:list',
+          'system:permission:add',
+          'system:permission:edit',
+          'system:permission:delete'
+        ]
+      }
+      userStore.setToken('dev_mock_token_12345')
+      userStore.setUserInfo(mockUser)
+    }
+
     // 检查是否已登录
     const hasToken = !!userStore.token
 

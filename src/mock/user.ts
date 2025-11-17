@@ -70,79 +70,9 @@ const tokenMap = {
 }
 
 export default [
-  // 登录接口
-  {
-    url: '/api/user/login',
-    method: 'post',
-    response: ({ body }: any) => {
-      const { username, password } = body
-
-      // 模拟验证
-      if (username === 'admin' && password === 'admin123') {
-        return {
-          code: 0,
-          data: {
-            token: 'admin_token_12345',
-            user: users.admin
-          },
-          message: '登录成功'
-        }
-      } else if (username === 'user' && password === 'user123') {
-        return {
-          code: 0,
-          data: {
-            token: 'user_token_67890',
-            user: users.user
-          },
-          message: '登录成功'
-        }
-      } else {
-        return {
-          code: 401,
-          data: null,
-          message: '用户名或密码错误'
-        }
-      }
-    }
-  },
-
-  // 获取当前用户信息接口
-  {
-    url: '/api/user/info',
-    method: 'get',
-    response: ({ headers }: any) => {
-      const authHeader = headers.authorization || ''
-      const token = authHeader.replace('Bearer ', '')
-
-      const username = tokenMap[token as keyof typeof tokenMap]
-      if (username && users[username as keyof typeof users]) {
-        return {
-          code: 0,
-          data: users[username as keyof typeof users],
-          message: '获取成功'
-        }
-      } else {
-        return {
-          code: 401,
-          data: null,
-          message: 'Token无效或已过期'
-        }
-      }
-    }
-  },
-
-  // 登出接口
-  {
-    url: '/api/user/logout',
-    method: 'post',
-    response: () => {
-      return {
-        code: 0,
-        data: null,
-        message: '登出成功'
-      }
-    }
-  },
+  // ✅ 登录、登出、获取用户信息接口已移除
+  // 这些接口现在由真实的后端 API 提供
+  // 请配置 VITE_API_BASE_URL 环境变量指向真实的后端地址
 
   // 获取用户列表接口（支持分页和搜索）
   {
