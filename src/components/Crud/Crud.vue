@@ -136,7 +136,7 @@
       :confirm-loading="submitLoading"
       :mask-closable="editModalMaskClosable"
       @ok="handleEditSubmit"
-      @cancel="triggerDrawerClose"
+      @cancel="handleDrawerClose"
     >
       <a-form
         ref="editFormRef"
@@ -161,17 +161,15 @@
       </a-form>
     </a-modal>
 
-    <!-- Drawer 模式 - 使用延迟状态变化实现关闭动画 -->
+    <!-- Drawer 模式 - 使用 :open 属性控制显示，确保关闭动画正常播放 -->
     <a-drawer
-      v-if="editModalVisible"
       :open="editModalVisible"
       :title="editModalTitle"
       :width="editDrawerWidth"
       :mask-closable="editModalMaskClosable"
+      :destroy-on-close="false"
       placement="right"
-      :transition-name="false"
-      :class="{ 'drawer-closing-state': isClosingDrawer }"
-      @close="triggerDrawerClose"
+      @close="handleDrawerClose"
     >
         <a-form
           ref="editFormRef"
@@ -196,7 +194,7 @@
         </a-form>
         <template #footer>
           <div style="text-align: right">
-            <a-button style="margin-right: 8px" @click="triggerDrawerClose">
+            <a-button style="margin-right: 8px" @click="handleDrawerClose">
               取消
             </a-button>
             <a-button type="primary" :loading="submitLoading" @click="handleEditSubmit">
@@ -219,6 +217,8 @@ import {
   Switch,
   Button
 } from 'ant-design-vue'
+
+const { RangePicker } = DatePicker
 import { PlusOutlined } from '@ant-design/icons-vue'
 import type { VxeTableInstance, VxeTableProps } from 'vxe-table'
 import { http } from '@/api/http'
@@ -238,7 +238,6 @@ const editFormRef = ref()
 const loading = ref(false)
 const submitLoading = ref(false)
 const editModalVisible = ref(false)
-const isClosingDrawer = ref(false)
 const editFormData = reactive<Record<string, any>>({})
 const currentEditRow = ref<any>(null)
 const currentEditAction = ref<ActionItem | null>(null)
@@ -369,6 +368,7 @@ function getFormComponent(componentName: string) {
     InputNumber,
     Select,
     DatePicker,
+    RangePicker,
     Switch,
     Button
   }
@@ -536,8 +536,8 @@ async function handleEditSubmit() {
         currentEditAction.value.hooks.onSubmitSuccess()
       }
 
-      // 触发关闭动画（而不是直接设置为false）
-      triggerDrawerClose()
+      // 关闭 Drawer
+      handleDrawerClose()
 
       // 刷新数据
       loadData()
@@ -555,39 +555,23 @@ async function handleEditSubmit() {
 }
 
 /**
- * 触发Drawer关闭 - 实现延迟状态变化以支持关闭动画
- * 1. 首先设置isClosingDrawer=true（应用关闭动画样式）
- * 2. 等待0.3s CSS动画完成
- * 3. 再设置editModalVisible=false（移除DOM）
- * 4. 最后清理数据
+ * 处理Drawer关闭
+ * @description 根据侧边栏弹窗动画优化规范，使用简单的状态控制
+ *              Ant Design Vue 会自动管理打开/关闭动画
  */
-function triggerDrawerClose() {
-  isClosingDrawer.value = true
-
-  // 等待关闭动画完成（0.3s）后再移除DOM
+function handleDrawerClose() {
+  editModalVisible.value = false
+  
+  // 清理数据（在动画完成后）
   setTimeout(() => {
-    editModalVisible.value = false
-
-    // 清理数据
-    setTimeout(() => {
-      completeClose()
-    }, 0)
-  }, 300)
-}
-
-/**
- * 完全关闭Drawer - 清理所有数据
- */
-function completeClose() {
-  // 重置关闭状态
-  isClosingDrawer.value = false
-  currentEditRow.value = null
-  currentEditAction.value = null
-
-  // 清理表单数据
-  Object.keys(editFormData).forEach(key => {
-    delete editFormData[key]
-  })
+    currentEditRow.value = null
+    currentEditAction.value = null
+    
+    // 清理表单数据
+    Object.keys(editFormData).forEach(key => {
+      delete editFormData[key]
+    })
+  }, 300) // 等待动画完成
 }
 
 // 暴露方法
@@ -629,29 +613,50 @@ onMounted(() => {
   margin-top: 16px;
 }
 
-/* ========== Drawer 关闭动画配置 ========== */
-/* Drawer的打开状态（默认状态）- 确保平滑打开动画 */
-:deep(.ant-drawer-mask) {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s !important;
-}
+/* ========== Drawer 动画配置 ========== */
+/**
+ * 侧边栏弹窗动画优化
+ * @description 统一的打开/关闭动画效果，使用 Material Design 标准缓动函数
+ * @reference 技术规范: 01-侧边栏弹窗动画优化.md
+ */
 
-:deep(.ant-drawer-content-wrapper) {
-  transform: translateX(0) !important;
-  opacity: 1 !important;
+/* 抽屉容器动画 - 统一过渡效果 */
+:deep(.ant-drawer) {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Drawer的关闭状态 - drawer-closing-state类被添加到ant-drawer容器时生效 */
-:deep(.ant-drawer.drawer-closing-state) .ant-drawer-mask {
-  opacity: 0 !important;
-  visibility: hidden !important;
+/* 抽屉内容包裹层 - 关键：确保滑入滑出效果一致 */
+:deep(.ant-drawer-content-wrapper) {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-:deep(.ant-drawer.drawer-closing-state) .ant-drawer-content-wrapper {
-  transform: translateX(100%) !important;
-  opacity: 0 !important;
+/* 抽屉内容区域 */
+:deep(.ant-drawer-content) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 抽屉头部 */
+:deep(.ant-drawer-header) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 抽屉主体 */
+:deep(.ant-drawer-body) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 关闭按钮动画 - 保持与其他元素一致的时间 */
+:deep(.ant-drawer-close) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+:deep(.ant-drawer-close:hover) {
+  transform: scale(1.1);
+}
+
+/* 遮罩层动画 - 确保淡入淡出效果一致 */
+:deep(.ant-drawer-mask) {
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 /* Standard CSS for VxeGrid Alignment Fix */
@@ -690,71 +695,5 @@ onMounted(() => {
   width: 100% !important;
 }
 
-/* ========== Vue Transition 动画定义 ========== */
-/* 用于 Transition 包装器的动画类 */
-.drawer-slide-enter-active,
-.drawer-slide-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.drawer-slide-enter-from :deep(.ant-drawer-mask) {
-  opacity: 0 !important;
-}
-
-.drawer-slide-enter-from :deep(.ant-drawer-content-wrapper) {
-  transform: translateX(100%) !important;
-  opacity: 0 !important;
-}
-
-.drawer-slide-leave-to :deep(.ant-drawer-mask) {
-  opacity: 0 !important;
-}
-
-.drawer-slide-leave-to :deep(.ant-drawer-content-wrapper) {
-  transform: translateX(100%) !important;
-  opacity: 0 !important;
-}
-
-/* ========== Ant Design Drawer 基础样式 ========== */
-:deep(.ant-drawer-mask) {
-  opacity: 1 !important;
-}
-
-:deep(.ant-drawer-content-wrapper) {
-  transform: translateX(0) !important;
-  opacity: 1 !important;
-}
-
-/* 关闭按钮悬停效果 */
-:deep(.ant-drawer-close) {
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s !important;
-}
-
-:deep(.ant-drawer-close:hover) {
-  transform: scale(1.15) !important;
-}
-
-/* 动画帧定义 */
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideOutRight {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-}
 </style>
 

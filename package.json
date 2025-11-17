@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --skipLibCheck && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:mock": "node server.js"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
@@ -14,6 +15,7 @@
     "axios": "^1.13.2",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.19",
+    "express": "^4.18.2",
     "exceljs": "^4.4.0",
     "lodash-es": "^4.17.21",
     "nprogress": "^0.2.0",

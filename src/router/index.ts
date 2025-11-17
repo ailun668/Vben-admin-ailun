@@ -77,6 +77,17 @@ const asyncRoutes: RouteRecordRaw[] = [
       roles: ['admin', 'user']
     }
   },
+   {
+    path: '/sys/syslog',
+    name: 'syslog',
+    component: () => import('@/views/SysLogView/SysLogView.vue'),
+    meta: {
+      title: '系统日志',
+      requiresAuth: true,
+      roles: ['admin'],
+      icon: 'setting'
+    }
+  },
   {
     path: '/profile',
     name: 'profile',
@@ -86,7 +97,8 @@ const asyncRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
       roles: ['admin', 'user']
     }
-  }
+  },
+ 
 ]
 
 const router = createRouter({

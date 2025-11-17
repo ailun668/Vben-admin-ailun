@@ -74,6 +74,17 @@ const ALL_ROUTES: RouteItem[] = [
     }
   },
   {
+    path: '/sys/syslog',
+    name: 'SysLog',
+    component: 'SysLogView',
+    meta: {
+      title: '系统日志',
+      icon: 'setting',
+      requiresAuth: true,
+      roles: ['admin']
+    }
+  },
+  {
     path: '/login',
     name: 'Login',
     component: 'LoginView',

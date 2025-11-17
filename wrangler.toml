@@ -1,0 +1,30 @@
+# Cloudflare Workers 配置
+# 文档: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "vben-admin-mock-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Routes 配置 - 将 API 请求路由到 Cloudflare Pages 函数
+routes = [
+  { pattern = "example.com/api/*", zone_name = "example.com" }
+]
+
+# 环境配置
+[env.production]
+# 生产环境配置
+
+[env.development]
+# 开发环境配置
+
+# 构建配置
+[build]
+command = "npm install && npm run build"
+cwd = "."
+
+# KV 存储配置（可选，用于存储数据）
+[[kv_namespaces]]
+binding = "KV_STORE"
+id = "your_kv_id"
+preview_id = "your_preview_id"
