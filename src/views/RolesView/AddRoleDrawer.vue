@@ -5,6 +5,7 @@
     :width="600"
     placement="right"
     :mask-closable="true"
+    :destroy-on-close="false"
     @close="handleCancel"
   >
     <a-form
@@ -172,32 +173,48 @@ function handleCancel() {
 </script>
 
 <style scoped>
-/* 抽屉关闭动画优化 */
+/**
+ * 抽屉动画优化
+ * @description 确保打开和关闭动画效果一致，使用统一的过渡时间和缓动函数
+ */
+
+/* 抽屉容器动画 - 统一过渡效果 */
 :deep(.ant-drawer) {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
+/* 抽屉内容包裹层 - 关键：确保滑入滑出效果一致 */
 :deep(.ant-drawer-content-wrapper) {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
+/* 抽屉内容区域 */
 :deep(.ant-drawer-content) {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* 抽屉关闭时的动画 */
+/* 抽屉头部 */
+:deep(.ant-drawer-header) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 抽屉主体 */
+:deep(.ant-drawer-body) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 关闭按钮动画 - 保持与其他元素一致的时间 */
 :deep(.ant-drawer-close) {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 :deep(.ant-drawer-close:hover) {
   transform: scale(1.1);
 }
 
-/* 遮罩层动画 */
+/* 遮罩层动画 - 确保淡入淡出效果一致 */
 :deep(.ant-drawer-mask) {
-  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 </style>
 

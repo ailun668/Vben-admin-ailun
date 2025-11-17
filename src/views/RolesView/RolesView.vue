@@ -2,7 +2,6 @@
   <div class="roles-view">
     <Crud ref="crudRef" :config="roleCrudConfig" />
     <AddRoleDrawer
-      v-if="addRoleModalVisible"
       :open="addRoleModalVisible"
       @cancel="addRoleModalVisible = false"
       @success="handleAddRoleSuccess"
