@@ -95,7 +95,7 @@ git push origin main
 2. 进入 Pages 项目 → **连接 Git**
 3. 选择仓库：`学习/框架`
 4. 配置构建设置：
-   - **Root directory**: `my-vue-app`
+   - **Root directory**: `My enterprise`
    - **Build command**: `pnpm build`
    - **Build output directory**: `dist`
 

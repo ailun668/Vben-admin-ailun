@@ -219,7 +219,7 @@ const iconMap = {
 ## 🎨 项目架构全景
 
 ```
-my-vue-app/
+My enterprise/
 ├── src/
 │   ├── router/
 │   │   └── index.ts                 ✅ [修复] 路由配置

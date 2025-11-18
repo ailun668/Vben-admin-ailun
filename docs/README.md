@@ -184,7 +184,7 @@ Vue Vben Admin 默认使用 Ant Design Vue 作为 UI 组件库，两者可以完
 
 ---
 
-**文档位置**: `D:\学习\框架\my-vue-app\docs\`  
+**文档位置**: `D:\学习\框架\My enterprise\docs\`  
 **最后更新**: 2024年  
 **维护者**: 开发团队
 

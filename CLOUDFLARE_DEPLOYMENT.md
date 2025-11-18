@@ -69,7 +69,7 @@ git push origin main
 4. 选择你的仓库（学习/框架）
 5. 配置构建设置：
    - **构建命令**: `pnpm build`
-   - **输出目录**: `my-vue-app/dist`
+   - **输出目录**: `My enterprise/dist`
    - **Framework**: Vue
 
 **3A-3: 自动部署**
@@ -136,7 +136,7 @@ https://vben-admin-ailun.pages.dev
 ## 文件结构说明
 
 ```
-my-vue-app/
+My enterprise/
 ├── dist/                          # 构建输出（部署到 Pages）
 ├── functions/                     # Cloudflare Functions（自动部署）
 │   └── api/user/

@@ -16,7 +16,7 @@
             <div class="logo-icon">
               <img src="/1.png" alt="Logo" class="logo-img" />
             </div>
-            <h2 v-if="!collapsed" class="logo-title">Vue App</h2>
+            <h2 v-if="!collapsed" class="logo-title">My Enterprise</h2>
           </div>
 
           <!-- 菜单区域 -->
@@ -78,7 +78,7 @@
           </div>
         </a-layout-content>
         <a-layout-footer class="layout-footer">
-          My Vue App © 2025 Created by Vue + Vite
+          Enterprise-level framework © 2025 Created by Vue + Vite
         </a-layout-footer>
       </a-layout>
     </a-layout>

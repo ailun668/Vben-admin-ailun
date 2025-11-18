@@ -1,5 +1,5 @@
 {
-  "name": "my-vue-app",
+  "name": "My enterprise",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -15,6 +15,7 @@
     "axios": "^1.13.2",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.19",
+    "echarts": "^5.4.3",
     "express": "^4.18.2",
     "exceljs": "^4.4.0",
     "lodash-es": "^4.17.21",

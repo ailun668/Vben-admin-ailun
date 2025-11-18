@@ -4,7 +4,7 @@
 
 ```bash
 # 进入项目目录
-cd D:\学习\框架\my-vue-app
+cd D:\学习\框架\My enterprise
 
 # 安装依赖（如果还没装）
 npm install

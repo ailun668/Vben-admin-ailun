@@ -1,7 +1,7 @@
 # Vue 项目 BUG 分析与修复报告
 
 **报告日期**: 2025-11-14
-**项目**: My Vue App (Vue 3 + TypeScript + Vite)
+**项目**: Enterprise-level framework (Vue 3 + TypeScript + Vite)
 **分析者**: Claude AI
 **状态**: 已识别 BUG，需修复
 

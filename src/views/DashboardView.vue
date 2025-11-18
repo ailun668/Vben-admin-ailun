@@ -74,7 +74,7 @@
         <a-card title="系统信息" :bordered="false">
           <a-descriptions :column="1" size="small">
             <a-descriptions-item label="系统名称">
-              My Vue App
+              Enterprise-level framework
             </a-descriptions-item>
             <a-descriptions-item label="版本">
               v1.0.0
